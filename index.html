@@ -79,7 +79,7 @@
             margin-top: 20px;
         }
 
-        #drawButton {
+        #drawButton, .cost-draw-button {
             background-color: #4CAF50;
             color: white;
             font-size: 20px;
@@ -87,8 +87,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 50px;
-            margin-bottom: 0px;
+            margin-top: 10px;
         }
 
         #selectAllButton, #deselectAllButton {
@@ -97,7 +96,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 0px;
+            margin-top: 20px;
         }
 
         #resultContainer {
@@ -126,6 +125,12 @@
             text-align: center;
             margin-top: 20px;
         }
+
+        .count-display {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -135,7 +140,14 @@
     <div class="container" id="itemContainer"></div>
 
     <div class="button-container">
-        <button id="drawButton">抽選</button>
+        <button id="drawButton">選択キャラから抽選</button>
+    </div>
+
+    <div class="button-container">
+        <button class="cost-draw-button" data-cost="30">30コスから抽選</button>
+        <button class="cost-draw-button" data-cost="25">25コスから抽選</button>
+        <button class="cost-draw-button" data-cost="20">20コスから抽選</button>
+        <button class="cost-draw-button" data-cost="15">15コスから抽選</button>
     </div>
 
     <div class="checkbox-container">
@@ -149,10 +161,34 @@
 
     <div id="resultContainer"></div>
 
+    <div class="count-display">
+        <p id="totalDrawButtonCount">ボタンを押した回数: 0</p>
+    </div>
+
     <script>
         window.onload = function () {
-            const itemContainer = document.getElementById("itemContainer");
+            const currentTime = new Date().getTime();
+            const savedTime = localStorage.getItem("lastUpdatedTime");
+            let totalDrawButtonCount = parseInt(localStorage.getItem("totalDrawButtonCount") || "0");
 
+            if (savedTime) {
+                const timeElapsed = currentTime - savedTime;
+
+                // 3時間（10800000ミリ秒）経過していればリセット
+                if (timeElapsed > 10800000) {
+                    totalDrawButtonCount = 0; // 3時間以上経過したらリセット
+                    localStorage.setItem("totalDrawButtonCount", totalDrawButtonCount);
+                }
+            }
+
+            // 現在時刻を保存（リセットの基準）
+            localStorage.setItem("lastUpdatedTime", currentTime);
+
+            // 初期表示
+            document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
+
+            // アイテムの作成
+            const itemContainer = document.getElementById("itemContainer");
             const imageNames = [
                 "グリフィン", "スズラン", "影", "キャヴァリー", "ラジエル", 
                 "エルフィン", "シュウウ", "ヒカリ", "ケルビム", 
@@ -162,7 +198,6 @@
                 "エミカ", "デュカリオン", "チンニ", "ザハロワ", "ダークスター", 
                 "ローランド", "スノーウォル", "ヤミン", "カタリナ", "オーキッド"
             ];
-
             const costs = ["30コス", "25コス", "20コス", "15コス"];
             const costRanges = {
                 30: 9, 
@@ -179,49 +214,26 @@
             ];
 
             createItems(rearrangedImageNames, itemContainer, costs, costRanges);
-
             restoreSelection();
 
+            // 抽選ボタンのクリックイベント
             document.getElementById("drawButton").addEventListener("click", function () {
-                const selectedItems = document.querySelectorAll(".item.selected");
-                if (selectedItems.length === 0) {
-                    alert("選択したアイテムがありません！");
-                    return;
-                }
+                totalDrawButtonCount++;
+                document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
+                localStorage.setItem("totalDrawButtonCount", totalDrawButtonCount);
+                drawRandomItems(rearrangedImageNames);
+            });
 
-                const selectedIndexes = Array.from(selectedItems).map(item => parseInt(item.querySelector("img").dataset.index));
-                const randomResults = getRandomElements(selectedIndexes, 4);
-
-                const resultContainer = document.getElementById("resultContainer");
-                resultContainer.innerHTML = "";
-
-                const hideAwakening = document.getElementById("hideAwakeningCheckbox").checked;
-
-                randomResults.forEach(resultIndex => {
-                    const resultDiv = document.createElement("div");
-                    resultDiv.classList.add("result-item");
-
-                    const resultImage = document.createElement("img");
-                    resultImage.src = `images/item${resultIndex}.png`;
-                    resultImage.alt = `アイテム${resultIndex}`;
-                    resultDiv.appendChild(resultImage);
-
-                    const resultName = document.createElement("div");
-                    resultName.classList.add("result-name");
-                    resultName.textContent = rearrangedImageNames[resultIndex - 1];
-                    resultDiv.appendChild(resultName);
-
-                    // 覚醒の表示制御
-                    if (!hideAwakening) {
-                        const ranks = ["F覚醒", "S覚醒", "M覚醒", "D覚醒", "B覚醒"];
-                        const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
-                        const resultRank = document.createElement("div");
-                        resultRank.classList.add("result-rank");
-                        resultRank.textContent = randomRank;
-                        resultDiv.appendChild(resultRank);
-                    }
-
-                    resultContainer.appendChild(resultDiv);
+            // コストごとの抽選ボタン
+            const costDrawButtons = document.querySelectorAll('.cost-draw-button');
+            costDrawButtons.forEach(button => {
+                button.addEventListener("click", function () {
+                    totalDrawButtonCount++;
+                    document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
+                    localStorage.setItem("totalDrawButtonCount", totalDrawButtonCount);
+                    const cost = button.dataset.cost;
+                    const filteredIndexes = getFilteredIndexes(cost);
+                    drawRandomItems(rearrangedImageNames, filteredIndexes);
                 });
             });
 
@@ -251,7 +263,6 @@
         function createItems(imageNames, parentElement, costs, costRanges) {
             let groupIndex = 0;
             let itemGroup;
-
             let currentIndex = 0;
 
             costs.forEach(cost => {
@@ -278,7 +289,6 @@
                     img.addEventListener("click", function () {
                         itemDiv.classList.toggle("selected");
                         img.style.filter = itemDiv.classList.contains("selected") ? "brightness(50%)" : "brightness(100%)";
-
                         saveSelection();
                     });
 
@@ -295,40 +305,78 @@
             });
         }
 
-        function getRandomElements(arr, num) {
-            const result = [];
-            const copiedArray = [...arr];
-
-            while (result.length < num && copiedArray.length > 0) {
-                const randomIndex = Math.floor(Math.random() * copiedArray.length);
-                result.push(copiedArray.splice(randomIndex, 1)[0]);
+        function drawRandomItems(imageNames, filteredIndexes = []) {
+            const selectedItems = document.querySelectorAll(".item.selected");
+            if (selectedItems.length === 0) {
+                alert("選択したアイテムがありません！");
+                return;
             }
 
-            return result;
+            const selectedIndexes = Array.from(selectedItems).map(item => parseInt(item.querySelector("img").dataset.index));
+
+            // コストフィルターが設定されていれば、対象を絞る
+            const finalIndexes = filteredIndexes.length > 0 ? filteredIndexes : selectedIndexes;
+
+            const randomResults = getRandomElements(finalIndexes, 4);
+
+            const resultContainer = document.getElementById("resultContainer");
+            resultContainer.innerHTML = ""; // 結果を初期化
+
+            randomResults.forEach(resultIndex => {
+                const resultDiv = document.createElement("div");
+                resultDiv.classList.add("result-item");
+
+                const resultImage = document.createElement("img");
+                resultImage.src = `images/item${resultIndex}.png`;
+                resultImage.alt = `アイテム${resultIndex}`;
+                resultDiv.appendChild(resultImage);
+
+                const resultName = document.createElement("div");
+                resultName.classList.add("result-name");
+                resultName.textContent = imageNames[resultIndex - 1];
+                resultDiv.appendChild(resultName);
+
+                const ranks = ["F覚醒", "S覚醒", "M覚醒", "D覚醒", "B覚醒"];
+                const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
+                const resultRank = document.createElement("div");
+                resultRank.classList.add("result-rank");
+                resultRank.textContent = randomRank;
+                resultDiv.appendChild(resultRank);
+
+                resultContainer.appendChild(resultDiv);
+            });
+        }
+
+        function getRandomElements(arr, num) {
+            const shuffled = arr.slice();
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled.slice(0, num);
         }
 
         function saveSelection() {
-            const selectedItems = [];
-            const allItems = document.querySelectorAll(".item.selected");
-            allItems.forEach(item => {
-                selectedItems.push(parseInt(item.querySelector("img").dataset.index));
-            });
-
-            localStorage.setItem("selectedItems", JSON.stringify(selectedItems));
+            const selectedItems = document.querySelectorAll(".item.selected");
+            const selectedIndexes = Array.from(selectedItems).map(item => parseInt(item.querySelector("img").dataset.index));
+            localStorage.setItem("selectedItems", JSON.stringify(selectedIndexes));
         }
 
         function restoreSelection() {
-            const selectedItems = JSON.parse(localStorage.getItem("selectedItems") || "[]");
-
-            const allItems = document.querySelectorAll(".item");
-            allItems.forEach(item => {
-                const itemIndex = parseInt(item.querySelector("img").dataset.index);
-                if (selectedItems.includes(itemIndex)) {
-                    item.classList.add("selected");
-                    const img = item.querySelector("img");
-                    img.style.filter = "brightness(50%)";
-                }
+            const selectedIndexes = JSON.parse(localStorage.getItem("selectedItems") || "[]");
+            selectedIndexes.forEach(index => {
+                const itemDiv = document.querySelector(`img[data-index="${index}"]`).parentElement;
+                itemDiv.classList.add("selected");
+                itemDiv.querySelector("img").style.filter = "brightness(50%)";
             });
+        }
+
+        function getFilteredIndexes(cost) {
+            const filteredIndexes = [];
+            for (let i = 0; i < costRanges[parseInt(cost)]; i++) {
+                filteredIndexes.push(i + 1);
+            }
+            return filteredIndexes;
         }
     </script>
 </body>
