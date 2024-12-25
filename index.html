@@ -301,6 +301,7 @@
             createItems(rearrangedImageNames, itemContainer, costs, costRanges);
 
             restoreSelection();
+            restoreAwakeningState(); // 追加: 覚醒状態を復元
 
             let totalDrawButtonCount = getDrawButtonCount();
             document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
@@ -320,17 +321,10 @@
                 saveDrawButtonCount(totalDrawButtonCount);
             });
 
-            // コストごとの抽選ボタン
-            const costDrawButtons = document.querySelectorAll('.cost-draw-button');
-            costDrawButtons.forEach(button => {
-                button.addEventListener("click", function () {
-                    const cost = button.dataset.cost;
-                    const filteredIndexes = getFilteredIndexes(cost);
-                    drawRandomItems(rearrangedImageNames, filteredIndexes);
-                    totalDrawButtonCount++;
-                    document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
-                    saveDrawButtonCount(totalDrawButtonCount);
-                });
+            // チェックボックスの変更イベント
+            document.getElementById("hideAwakeningCheckbox").addEventListener("change", function () {
+                toggleAwakeningVisibility();
+                saveAwakeningState(); // チェックボックスの状態を保存
             });
 
             // 全選択ボタン
@@ -356,11 +350,6 @@
 
                 saveSelection();
             });
-
-            // チェックボックスの変更イベント
-            document.getElementById("hideAwakeningCheckbox").addEventListener("change", function () {
-                toggleAwakeningVisibility();
-            });
         };
 
         function createItems(imageNames, parentElement, costs, costRanges) {
@@ -378,52 +367,30 @@
                 costLabel.textContent = cost;
                 itemGroup.appendChild(costLabel);
 
-                for (let i = 0; i < costRanges[parseInt(cost)]; i++) {
-                    const itemName = imageNames[currentIndex];
-                    currentIndex++;
+                const range = costRanges[parseInt(cost)] || 0;
 
+                for (let i = 0; i < range; i++) {
                     const itemDiv = document.createElement("div");
                     itemDiv.classList.add("item");
-
                     const img = document.createElement("img");
-                    img.src = `images/item${currentIndex}.png`;
-                    img.alt = `アイテム${currentIndex}`;
-                    img.dataset.index = currentIndex;
-
-                    img.addEventListener("click", function () {
-                        itemDiv.classList.toggle("selected");
-                        img.style.filter = itemDiv.classList.contains("selected") ? "brightness(100%)" : "brightness(50%)";
-
-                        saveSelection();
-                    });
-
-                    const itemNameDiv = document.createElement("div");
-                    itemNameDiv.classList.add("item-name");
-                    itemNameDiv.textContent = itemName;
-
+                    img.src = `images/item${currentIndex + 1}.png`;
+                    img.alt = imageNames[currentIndex];
+                    img.dataset.index = currentIndex + 1;
                     itemDiv.appendChild(img);
-                    itemDiv.appendChild(itemNameDiv);
+                    const nameDiv = document.createElement("div");
+                    nameDiv.classList.add("item-name");
+                    nameDiv.textContent = imageNames[currentIndex];
+                    itemDiv.appendChild(nameDiv);
+
                     itemGroup.appendChild(itemDiv);
+                    currentIndex++;
                 }
 
                 parentElement.appendChild(itemGroup);
             });
         }
 
-        function toggleAwakeningVisibility() {
-            const isChecked = document.getElementById("hideAwakeningCheckbox").checked;
-            const resultRanks = document.querySelectorAll(".result-rank");
-
-            resultRanks.forEach(rank => {
-                if (isChecked) {
-                    rank.style.display = 'none';
-                } else {
-                    rank.style.display = 'block';
-                }
-            });
-        }
-
-        function drawRandomItems(imageNames, filteredIndexes = []) {
+        function drawRandomItems(imageNames) {
             const selectedItems = document.querySelectorAll(".item.selected");
             if (selectedItems.length === 0) {
                 alert("選択したアイテムがありません！");
@@ -432,13 +399,12 @@
 
             const selectedIndexes = Array.from(selectedItems).map(item => parseInt(item.querySelector("img").dataset.index));
 
-            // コストフィルターが設定されていれば、対象を絞る
-            const finalIndexes = filteredIndexes.length > 0 ? filteredIndexes : selectedIndexes;
-
-            const randomResults = getRandomElements(finalIndexes, 4);
+            const randomResults = getRandomElements(selectedIndexes, 4);
 
             const resultContainer = document.getElementById("resultContainer");
             resultContainer.innerHTML = ""; // 結果を初期化
+
+            const isHideAwakeningChecked = document.getElementById("hideAwakeningCheckbox").checked;
 
             randomResults.forEach(resultIndex => {
                 const resultDiv = document.createElement("div");
@@ -454,20 +420,32 @@
                 resultName.textContent = imageNames[resultIndex - 1];
                 resultDiv.appendChild(resultName);
 
-                const ranks = ["S覚醒", "F覚醒", "M覚醒", "B覚醒", "D覚醒"];
-                const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
-                const resultRank = document.createElement("div");
-                resultRank.classList.add("result-rank", randomRank);
-                resultRank.textContent = randomRank;
-                resultDiv.appendChild(resultRank);
+                if (!isHideAwakeningChecked) {
+                    const ranks = ["S覚醒", "F覚醒", "M覚醒", "B覚醒", "D覚醒"];
+                    const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
+                    const resultRank = document.createElement("div");
+                    resultRank.classList.add("result-rank", randomRank);
+                    resultRank.textContent = randomRank;
+                    resultDiv.appendChild(resultRank);
+                }
 
                 resultContainer.appendChild(resultDiv);
             });
         }
 
-        function getRandomElements(array, count) {
-            const shuffled = [...array].sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, count);
+        function getRandomElements(arr, num) {
+            const shuffled = arr.slice();
+            let i = arr.length, temp, randomIndex;
+
+            while (i !== 0) {
+                randomIndex = Math.floor(Math.random() * i);
+                i--;
+                temp = shuffled[i];
+                shuffled[i] = shuffled[randomIndex];
+                shuffled[randomIndex] = temp;
+            }
+
+            return shuffled.slice(0, num);
         }
 
         function saveSelection() {
@@ -477,17 +455,45 @@
         }
 
         function restoreSelection() {
-            const selectedIndexes = JSON.parse(localStorage.getItem("selectedIndexes")) || [];
-            selectedIndexes.forEach(index => {
-                const itemDiv = document.querySelector(`.item img[data-index='${index}']`).parentElement;
-                itemDiv.classList.add("selected");
-                const img = itemDiv.querySelector("img");
-                img.style.filter = "brightness(100%)";
+            const selectedIndexes = JSON.parse(localStorage.getItem("selectedIndexes"));
+            if (selectedIndexes) {
+                selectedIndexes.forEach(index => {
+                    const item = document.querySelector(`img[data-index="${index}"]`);
+                    if (item) {
+                        item.parentElement.classList.add("selected");
+                        item.style.filter = "brightness(100%)";
+                    }
+                });
+            }
+        }
+
+        function toggleAwakeningVisibility() {
+            const isChecked = document.getElementById("hideAwakeningCheckbox").checked;
+            const resultRanks = document.querySelectorAll(".result-rank");
+            resultRanks.forEach(rank => {
+                if (isChecked) {
+                    rank.style.display = "none";
+                } else {
+                    rank.style.display = "block";
+                }
             });
         }
 
+        function saveAwakeningState() {
+            const isChecked = document.getElementById("hideAwakeningCheckbox").checked;
+            localStorage.setItem("hideAwakeningChecked", JSON.stringify(isChecked));
+        }
+
+        function restoreAwakeningState() {
+            const isChecked = JSON.parse(localStorage.getItem("hideAwakeningChecked"));
+            if (isChecked) {
+                document.getElementById("hideAwakeningCheckbox").checked = true;
+                toggleAwakeningVisibility();
+            }
+        }
+
         function getDrawButtonCount() {
-            return parseInt(localStorage.getItem("drawButtonCount") || 0);
+            return parseInt(localStorage.getItem("drawButtonCount")) || 0;
         }
 
         function saveDrawButtonCount(count) {
