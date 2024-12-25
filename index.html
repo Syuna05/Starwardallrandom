@@ -141,6 +141,20 @@
             color: white;
         }
 
+        /* 右下のリセットボタン */
+        #resetButton {
+            position: fixed;
+            bottom: 0px;
+            right: 0px;
+            background-color: red;
+            color: white;
+            font-size: 0.1px;
+            padding: 2.5px 2.5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
         /* レスポンシブデザイン */
         @media screen and (max-width: 768px) {
             h1 {
@@ -206,23 +220,23 @@
             margin-top: 5px;
         }
 
-        .result-rank.F {
+        .result-rank.F覚醒 {
             color: red; /* F覚醒 -> 赤 */
         }
 
-        .result-rank.M {
+        .result-rank.M覚醒 {
             color: orange; /* M覚醒 -> オレンジ */
         }
 
-        .result-rank.S {
+        .result-rank.S覚醒 {
             color: blue; /* S覚醒 -> 青 */
         }
 
-        .result-rank.B {
+        .result-rank.B覚醒 {
             color: gray; /* B覚醒 -> 灰色 */
         }
 
-        .result-rank.D {
+        .result-rank.D覚醒 {
             color: green; /* D覚醒 -> 緑 */
         }
     </style>
@@ -251,6 +265,9 @@
     <div class="count-display">
         <p id="totalDrawButtonCount">ボタンを押した回数: 0</p>
     </div>
+
+    <!-- リセットボタン -->
+    <button id="resetButton">リセット</button>
 
     <script>
         window.onload = function () {
@@ -296,6 +313,13 @@
                 saveDrawButtonCount(totalDrawButtonCount);
             });
 
+            // リセットボタンのクリックイベント
+            document.getElementById("resetButton").addEventListener("click", function () {
+                totalDrawButtonCount = 0;
+                document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
+                saveDrawButtonCount(totalDrawButtonCount);
+            });
+
             // コストごとの抽選ボタン
             const costDrawButtons = document.querySelectorAll('.cost-draw-button');
             costDrawButtons.forEach(button => {
@@ -309,6 +333,7 @@
                 });
             });
 
+            // 全選択ボタン
             document.getElementById("selectAllButton").addEventListener("click", function () {
                 const allItems = document.querySelectorAll(".item");
                 allItems.forEach(item => {
@@ -320,6 +345,7 @@
                 saveSelection();
             });
 
+            // 全解除ボタン
             document.getElementById("deselectAllButton").addEventListener("click", function () {
                 const allItems = document.querySelectorAll(".item");
                 allItems.forEach(item => {
@@ -329,6 +355,11 @@
                 });
 
                 saveSelection();
+            });
+
+            // チェックボックスの変更イベント
+            document.getElementById("hideAwakeningCheckbox").addEventListener("change", function () {
+                toggleAwakeningVisibility();
             });
         };
 
@@ -379,6 +410,19 @@
             });
         }
 
+        function toggleAwakeningVisibility() {
+            const isChecked = document.getElementById("hideAwakeningCheckbox").checked;
+            const resultRanks = document.querySelectorAll(".result-rank");
+
+            resultRanks.forEach(rank => {
+                if (isChecked) {
+                    rank.style.display = 'none';
+                } else {
+                    rank.style.display = 'block';
+                }
+            });
+        }
+
         function drawRandomItems(imageNames, filteredIndexes = []) {
             const selectedItems = document.querySelectorAll(".item.selected");
             if (selectedItems.length === 0) {
@@ -410,12 +454,11 @@
                 resultName.textContent = imageNames[resultIndex - 1];
                 resultDiv.appendChild(resultName);
 
-                const ranks = ["F", "S", "M", "D", "B"];
+                const ranks = ["S覚醒", "F覚醒", "M覚醒", "B覚醒", "D覚醒"];
                 const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
-
                 const resultRank = document.createElement("div");
-                resultRank.classList.add("result-rank", randomRank); // ランクに対応するクラスを追加
-                resultRank.textContent = `${randomRank}覚醒`;
+                resultRank.classList.add("result-rank", randomRank);
+                resultRank.textContent = randomRank;
                 resultDiv.appendChild(resultRank);
 
                 resultContainer.appendChild(resultDiv);
@@ -423,51 +466,28 @@
         }
 
         function getRandomElements(array, count) {
-            const shuffled = array.slice();
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
+            const shuffled = [...array].sort(() => 0.5 - Math.random());
             return shuffled.slice(0, count);
         }
 
-        function getFilteredIndexes(cost) {
-            const costRanges = {
-                30: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-                25: [9, 10, 11, 12, 13, 14, 15, 16, 17],
-                20: [18, 19, 20, 21, 22, 23, 24, 25, 26],
-                15: [27, 28, 29, 30, 31]
-            };
-
-            return costRanges[cost];
-        }
-
         function saveSelection() {
-            const selectedIndexes = [];
             const selectedItems = document.querySelectorAll(".item.selected");
-
-            selectedItems.forEach(item => {
-                selectedIndexes.push(parseInt(item.querySelector("img").dataset.index));
-            });
-
+            const selectedIndexes = Array.from(selectedItems).map(item => parseInt(item.querySelector("img").dataset.index));
             localStorage.setItem("selectedIndexes", JSON.stringify(selectedIndexes));
         }
 
         function restoreSelection() {
             const selectedIndexes = JSON.parse(localStorage.getItem("selectedIndexes")) || [];
-
-            const allItems = document.querySelectorAll(".item");
-            allItems.forEach(item => {
-                const index = parseInt(item.querySelector("img").dataset.index);
-                if (selectedIndexes.includes(index)) {
-                    item.classList.add("selected");
-                    item.querySelector("img").style.filter = "brightness(100%)";
-                }
+            selectedIndexes.forEach(index => {
+                const itemDiv = document.querySelector(`.item img[data-index='${index}']`).parentElement;
+                itemDiv.classList.add("selected");
+                const img = itemDiv.querySelector("img");
+                img.style.filter = "brightness(100%)";
             });
         }
 
         function getDrawButtonCount() {
-            return parseInt(localStorage.getItem("drawButtonCount")) || 0;
+            return parseInt(localStorage.getItem("drawButtonCount") || 0);
         }
 
         function saveDrawButtonCount(count) {
