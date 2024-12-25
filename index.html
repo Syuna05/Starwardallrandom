@@ -88,7 +88,7 @@
             border-radius: 5px;
             cursor: pointer;
             margin-top: 50px;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
         }
 
         #selectAllButton, #deselectAllButton {
@@ -97,7 +97,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 0px;
         }
 
         #resultContainer {
@@ -121,6 +121,11 @@
         .result-name, .result-rank {
             margin-top: 5px;
         }
+
+        .checkbox-container {
+            text-align: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -131,6 +136,13 @@
 
     <div class="button-container">
         <button id="drawButton">抽選</button>
+    </div>
+
+    <div class="checkbox-container">
+        <input type="checkbox" id="hideAwakeningCheckbox"> 覚醒を表示しない
+    </div>
+
+    <div class="button-container">
         <button id="selectAllButton" class="select-all-button">全選択</button>
         <button id="deselectAllButton" class="select-all-button">全解除</button>
     </div>
@@ -183,6 +195,8 @@
                 const resultContainer = document.getElementById("resultContainer");
                 resultContainer.innerHTML = "";
 
+                const hideAwakening = document.getElementById("hideAwakeningCheckbox").checked;
+
                 randomResults.forEach(resultIndex => {
                     const resultDiv = document.createElement("div");
                     resultDiv.classList.add("result-item");
@@ -197,12 +211,15 @@
                     resultName.textContent = rearrangedImageNames[resultIndex - 1];
                     resultDiv.appendChild(resultName);
 
-                    const ranks = ["F覚醒", "S覚醒", "M覚醒", "D覚醒", "B覚醒"];
-                    const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
-                    const resultRank = document.createElement("div");
-                    resultRank.classList.add("result-rank");
-                    resultRank.textContent = randomRank;
-                    resultDiv.appendChild(resultRank);
+                    // 覚醒の表示制御
+                    if (!hideAwakening) {
+                        const ranks = ["F覚醒", "S覚醒", "M覚醒", "D覚醒", "B覚醒"];
+                        const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
+                        const resultRank = document.createElement("div");
+                        resultRank.classList.add("result-rank");
+                        resultRank.textContent = randomRank;
+                        resultDiv.appendChild(resultRank);
+                    }
 
                     resultContainer.appendChild(resultDiv);
                 });
