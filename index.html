@@ -126,9 +126,15 @@
             margin-top: 20px;
         }
 
-        .count-display {
+        .result-count {
             text-align: center;
             margin-top: 20px;
+            color: white;
+        }
+
+        .count-display {
+            margin-top: 20px;
+            text-align: center;
             color: white;
         }
     </style>
@@ -167,28 +173,8 @@
 
     <script>
         window.onload = function () {
-            const currentTime = new Date().getTime();
-            const savedTime = localStorage.getItem("lastUpdatedTime");
-            let totalDrawButtonCount = parseInt(localStorage.getItem("totalDrawButtonCount") || "0");
-
-            if (savedTime) {
-                const timeElapsed = currentTime - savedTime;
-
-                // 3時間（10800000ミリ秒）経過していればリセット
-                if (timeElapsed > 10800000) {
-                    totalDrawButtonCount = 0; // 3時間以上経過したらリセット
-                    localStorage.setItem("totalDrawButtonCount", totalDrawButtonCount);
-                }
-            }
-
-            // 現在時刻を保存（リセットの基準）
-            localStorage.setItem("lastUpdatedTime", currentTime);
-
-            // 初期表示
-            document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
-
-            // アイテムの作成
             const itemContainer = document.getElementById("itemContainer");
+
             const imageNames = [
                 "グリフィン", "スズラン", "影", "キャヴァリー", "ラジエル", 
                 "エルフィン", "シュウウ", "ヒカリ", "ケルビム", 
@@ -198,6 +184,7 @@
                 "エミカ", "デュカリオン", "チンニ", "ザハロワ", "ダークスター", 
                 "ローランド", "スノーウォル", "ヤミン", "カタリナ", "オーキッド"
             ];
+
             const costs = ["30コス", "25コス", "20コス", "15コス"];
             const costRanges = {
                 30: 9, 
@@ -214,26 +201,30 @@
             ];
 
             createItems(rearrangedImageNames, itemContainer, costs, costRanges);
+
             restoreSelection();
+
+            let totalDrawButtonCount = getDrawButtonCount();
+            document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
 
             // 抽選ボタンのクリックイベント
             document.getElementById("drawButton").addEventListener("click", function () {
+                drawRandomItems(rearrangedImageNames);
                 totalDrawButtonCount++;
                 document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
-                localStorage.setItem("totalDrawButtonCount", totalDrawButtonCount);
-                drawRandomItems(rearrangedImageNames);
+                saveDrawButtonCount(totalDrawButtonCount);
             });
 
             // コストごとの抽選ボタン
             const costDrawButtons = document.querySelectorAll('.cost-draw-button');
             costDrawButtons.forEach(button => {
                 button.addEventListener("click", function () {
-                    totalDrawButtonCount++;
-                    document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
-                    localStorage.setItem("totalDrawButtonCount", totalDrawButtonCount);
                     const cost = button.dataset.cost;
                     const filteredIndexes = getFilteredIndexes(cost);
                     drawRandomItems(rearrangedImageNames, filteredIndexes);
+                    totalDrawButtonCount++;
+                    document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
+                    saveDrawButtonCount(totalDrawButtonCount);
                 });
             });
 
@@ -263,6 +254,7 @@
         function createItems(imageNames, parentElement, costs, costRanges) {
             let groupIndex = 0;
             let itemGroup;
+
             let currentIndex = 0;
 
             costs.forEach(cost => {
@@ -289,6 +281,7 @@
                     img.addEventListener("click", function () {
                         itemDiv.classList.toggle("selected");
                         img.style.filter = itemDiv.classList.contains("selected") ? "brightness(50%)" : "brightness(100%)";
+
                         saveSelection();
                     });
 
@@ -356,27 +349,59 @@
             return shuffled.slice(0, num);
         }
 
+        function getFilteredIndexes(cost) {
+            const costRanges = {
+                30: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                25: [10, 11, 12, 13, 14, 15, 16, 17, 18],
+                20: [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+                15: [30, 31, 32, 33, 34]
+            };
+
+            return costRanges[cost];
+        }
+
         function saveSelection() {
-            const selectedItems = document.querySelectorAll(".item.selected");
-            const selectedIndexes = Array.from(selectedItems).map(item => parseInt(item.querySelector("img").dataset.index));
-            localStorage.setItem("selectedItems", JSON.stringify(selectedIndexes));
+            const selectedItems = [];
+            const allItems = document.querySelectorAll(".item.selected");
+            allItems.forEach(item => {
+                selectedItems.push(parseInt(item.querySelector("img").dataset.index));
+            });
+
+            localStorage.setItem("selectedItems", JSON.stringify(selectedItems));
         }
 
         function restoreSelection() {
-            const selectedIndexes = JSON.parse(localStorage.getItem("selectedItems") || "[]");
-            selectedIndexes.forEach(index => {
-                const itemDiv = document.querySelector(`img[data-index="${index}"]`).parentElement;
-                itemDiv.classList.add("selected");
-                itemDiv.querySelector("img").style.filter = "brightness(50%)";
+            const selectedItems = JSON.parse(localStorage.getItem("selectedItems") || "[]");
+
+            const allItems = document.querySelectorAll(".item");
+            allItems.forEach(item => {
+                const itemIndex = parseInt(item.querySelector("img").dataset.index);
+                if (selectedItems.includes(itemIndex)) {
+                    item.classList.add("selected");
+                    const img = item.querySelector("img");
+                    img.style.filter = "brightness(50%)";
+                }
             });
         }
 
-        function getFilteredIndexes(cost) {
-            const filteredIndexes = [];
-            for (let i = 0; i < costRanges[parseInt(cost)]; i++) {
-                filteredIndexes.push(i + 1);
+        function saveDrawButtonCount(count) {
+            localStorage.setItem("drawButtonCount", JSON.stringify(count));
+            localStorage.setItem("lastDrawTime", Date.now());
+        }
+
+        function getDrawButtonCount() {
+            const lastDrawTime = localStorage.getItem("lastDrawTime");
+            const currentTime = Date.now();
+
+            // 3時間経過した場合はカウントをリセット
+            if (lastDrawTime && currentTime - lastDrawTime > 3 * 60 * 60 * 1000) {
+                localStorage.removeItem("drawButtonCount");
+                localStorage.removeItem("lastDrawTime");
+                return 0;
             }
-            return filteredIndexes;
+
+            // それ以外の場合、保存された回数を返す
+            return JSON.parse(localStorage.getItem("drawButtonCount") || "0");
         }
     </script>
 </body>
