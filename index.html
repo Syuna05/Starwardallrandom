@@ -270,235 +270,235 @@
     <button id="resetButton">リセット</button>
 
     <script>
-        window.onload = function () {
-            const itemContainer = document.getElementById("itemContainer");
+    window.onload = function () {
+        const itemContainer = document.getElementById("itemContainer");
 
-            const imageNames = [
-                "グリフィン", "スズラン", "影", "キャヴァリー", "ラジエル", 
-                "エルフィン", "シュウウ", "ヒカリ", "ケルビム", 
-                "シャープ", "スカイセーバー", "シャオリン", "18号", "アンジェリス", 
-                "フリード", "シグナス", "アリス", "カゼ", "アイーダ", 
-                "ヴァーチェ", "セラフィム", "スコーピオン", "パラス", "ベータ", 
-                "エミカ", "デュカリオン", "チンニ", "ザハロワ", "ダークスター", 
-                "ローランド", "スノーウォル", "ヤミン", "カタリナ", "オーキッド"
-            ];
+        const imageNames = [
+            "グリフィン", "スズラン", "影", "キャヴァリー", "ラジエル", 
+            "エルフィン", "シュウウ", "ヒカリ", "ケルビム", 
+            "シャープ", "スカイセーバー", "シャオリン", "18号", "アンジェリス", 
+            "フリード", "シグナス", "アリス", "カゼ", "アイーダ", 
+            "ヴァーチェ", "セラフィム", "スコーピオン", "パラス", "ベータ", 
+            "エミカ", "デュカリオン", "チンニ", "ザハロワ", "ダークスター", 
+            "ローランド", "スノーウォル", "ヤミン", "カタリナ", "オーキッド"
+        ];
 
-            const costs = ["30コス", "25コス", "20コス", "15コス"];
-            const costRanges = {
-                30: 9, 
-                25: 9, 
-                20: 11, 
-                15: 5
-            };
-
-            const rearrangedImageNames = [
-                ...imageNames.slice(0, 27), 
-                imageNames[27], 
-                imageNames[28], 
-                ...imageNames.slice(29)
-            ];
-
-            createItems(rearrangedImageNames, itemContainer, costs, costRanges);
-
-            restoreSelection();
-            restoreAwakeningState(); // 追加: 覚醒状態を復元
-
-            let totalDrawButtonCount = getDrawButtonCount();
-            document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
-
-            // 抽選ボタンのクリックイベント
-            document.getElementById("drawButton").addEventListener("click", function () {
-                drawRandomItems(rearrangedImageNames);
-                totalDrawButtonCount++;
-                document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
-                saveDrawButtonCount(totalDrawButtonCount);
-            });
-
-            // リセットボタンのクリックイベント
-            document.getElementById("resetButton").addEventListener("click", function () {
-                totalDrawButtonCount = 0;
-                document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
-                saveDrawButtonCount(totalDrawButtonCount);
-            });
-
-            // チェックボックスの変更イベント
-            document.getElementById("hideAwakeningCheckbox").addEventListener("change", function () {
-                toggleAwakeningVisibility();
-                saveAwakeningState(); // チェックボックスの状態を保存
-            });
-
-            // 全選択ボタン
-            document.getElementById("selectAllButton").addEventListener("click", function () {
-                const allItems = document.querySelectorAll(".item");
-                allItems.forEach(item => {
-                    item.classList.add("selected");
-                    const img = item.querySelector("img");
-                    img.style.filter = "brightness(100%)";
-                });
-
-                saveSelection();
-            });
-
-            // 全解除ボタン
-            document.getElementById("deselectAllButton").addEventListener("click", function () {
-                const allItems = document.querySelectorAll(".item");
-                allItems.forEach(item => {
-                    item.classList.remove("selected");
-                    const img = item.querySelector("img");
-                    img.style.filter = "brightness(50%)";
-                });
-
-                saveSelection();
-            });
+        const costs = ["30コス", "25コス", "20コス", "15コス"];
+        const costRanges = {
+            30: 9, 
+            25: 9, 
+            20: 11, 
+            15: 5
         };
 
-        function createItems(imageNames, parentElement, costs, costRanges) {
-            let groupIndex = 0;
-            let itemGroup;
+        const rearrangedImageNames = [
+            ...imageNames.slice(0, 27), 
+            imageNames[27], 
+            imageNames[28], 
+            ...imageNames.slice(29)
+        ];
 
-            let currentIndex = 0;
+        createItems(rearrangedImageNames, itemContainer, costs, costRanges);
 
-            costs.forEach(cost => {
-                itemGroup = document.createElement("div");
-                itemGroup.classList.add("item-group");
+        restoreSelection();
+        restoreAwakeningState();
 
-                const costLabel = document.createElement("div");
-                costLabel.classList.add("cost-label");
-                costLabel.textContent = cost;
-                itemGroup.appendChild(costLabel);
+        let totalDrawButtonCount = getDrawButtonCount();
+        document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
 
-                const range = costRanges[parseInt(cost)] || 0;
+        document.getElementById("drawButton").addEventListener("click", function () {
+            drawRandomItems(rearrangedImageNames);
+            totalDrawButtonCount++;
+            document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
+            saveDrawButtonCount(totalDrawButtonCount);
+        });
 
-                for (let i = 0; i < range; i++) {
-                    const itemDiv = document.createElement("div");
-                    itemDiv.classList.add("item");
-                    const img = document.createElement("img");
-                    img.src = `images/item${currentIndex + 1}.png`;
-                    img.alt = imageNames[currentIndex];
-                    img.dataset.index = currentIndex + 1;
-                    itemDiv.appendChild(img);
-                    const nameDiv = document.createElement("div");
-                    nameDiv.classList.add("item-name");
-                    nameDiv.textContent = imageNames[currentIndex];
-                    itemDiv.appendChild(nameDiv);
+        document.getElementById("resetButton").addEventListener("click", function () {
+            totalDrawButtonCount = 0;
+            document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
+            saveDrawButtonCount(totalDrawButtonCount);
+        });
 
-                    itemGroup.appendChild(itemDiv);
-                    currentIndex++;
-                }
+        document.getElementById("hideAwakeningCheckbox").addEventListener("change", function () {
+            toggleAwakeningVisibility();
+            saveAwakeningState();
+        });
 
-                parentElement.appendChild(itemGroup);
+        document.getElementById("selectAllButton").addEventListener("click", function () {
+            const allItems = document.querySelectorAll(".item");
+            allItems.forEach(item => {
+                item.classList.add("selected");
+                const img = item.querySelector("img");
+                img.style.filter = "brightness(100%)";  // 選択した場合は明るく
             });
-        }
 
-        function drawRandomItems(imageNames) {
-            const selectedItems = document.querySelectorAll(".item.selected");
-            if (selectedItems.length === 0) {
-                alert("選択したアイテムがありません！");
-                return;
-            }
+            saveSelection();
+        });
 
-            const selectedIndexes = Array.from(selectedItems).map(item => parseInt(item.querySelector("img").dataset.index));
-
-            const randomResults = getRandomElements(selectedIndexes, 4);
-
-            const resultContainer = document.getElementById("resultContainer");
-            resultContainer.innerHTML = ""; // 結果を初期化
-
-            const isHideAwakeningChecked = document.getElementById("hideAwakeningCheckbox").checked;
-
-            randomResults.forEach(resultIndex => {
-                const resultDiv = document.createElement("div");
-                resultDiv.classList.add("result-item");
-
-                const resultImage = document.createElement("img");
-                resultImage.src = `images/item${resultIndex}.png`;
-                resultImage.alt = `アイテム${resultIndex}`;
-                resultDiv.appendChild(resultImage);
-
-                const resultName = document.createElement("div");
-                resultName.classList.add("result-name");
-                resultName.textContent = imageNames[resultIndex - 1];
-                resultDiv.appendChild(resultName);
-
-                if (!isHideAwakeningChecked) {
-                    const ranks = ["S覚醒", "F覚醒", "M覚醒", "B覚醒", "D覚醒"];
-                    const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
-                    const resultRank = document.createElement("div");
-                    resultRank.classList.add("result-rank", randomRank);
-                    resultRank.textContent = randomRank;
-                    resultDiv.appendChild(resultRank);
-                }
-
-                resultContainer.appendChild(resultDiv);
+        document.getElementById("deselectAllButton").addEventListener("click", function () {
+            const allItems = document.querySelectorAll(".item");
+            allItems.forEach(item => {
+                item.classList.remove("selected");
+                const img = item.querySelector("img");
+                img.style.filter = "brightness(50%)";  // 選択解除した場合は灰色
             });
-        }
 
-        function getRandomElements(arr, num) {
-            const shuffled = arr.slice();
-            let i = arr.length, temp, randomIndex;
+            saveSelection();
+        });
+    };
 
-            while (i !== 0) {
-                randomIndex = Math.floor(Math.random() * i);
-                i--;
-                temp = shuffled[i];
-                shuffled[i] = shuffled[randomIndex];
-                shuffled[randomIndex] = temp;
-            }
+    function createItems(imageNames, parentElement, costs, costRanges) {
+        let groupIndex = 0;
+        let itemGroup;
+        let currentIndex = 0;
 
-            return shuffled.slice(0, num);
-        }
+        costs.forEach(cost => {
+            itemGroup = document.createElement("div");
+            itemGroup.classList.add("item-group");
 
-        function saveSelection() {
-            const selectedItems = document.querySelectorAll(".item.selected");
-            const selectedIndexes = Array.from(selectedItems).map(item => parseInt(item.querySelector("img").dataset.index));
-            localStorage.setItem("selectedIndexes", JSON.stringify(selectedIndexes));
-        }
+            const costLabel = document.createElement("div");
+            costLabel.classList.add("cost-label");
+            costLabel.textContent = cost;
+            itemGroup.appendChild(costLabel);
 
-        function restoreSelection() {
-            const selectedIndexes = JSON.parse(localStorage.getItem("selectedIndexes"));
-            if (selectedIndexes) {
-                selectedIndexes.forEach(index => {
-                    const item = document.querySelector(`img[data-index="${index}"]`);
-                    if (item) {
-                        item.parentElement.classList.add("selected");
-                        item.style.filter = "brightness(100%)";
-                    }
+            const range = costRanges[parseInt(cost)] || 0;
+
+            for (let i = 0; i < range; i++) {
+                const itemDiv = document.createElement("div");
+                itemDiv.classList.add("item");
+                const img = document.createElement("img");
+                img.src = `images/item${currentIndex + 1}.png`;
+                img.alt = imageNames[currentIndex];
+                img.dataset.index = currentIndex + 1;
+                itemDiv.appendChild(img);
+                const nameDiv = document.createElement("div");
+                nameDiv.classList.add("item-name");
+                nameDiv.textContent = imageNames[currentIndex];
+                itemDiv.appendChild(nameDiv);
+
+                itemDiv.addEventListener("click", function () {
+                    itemDiv.classList.toggle("selected");
+                    const img = itemDiv.querySelector("img");
+                    img.style.filter = itemDiv.classList.contains("selected") ? "brightness(100%)" : "brightness(50%)";
+                    saveSelection();
                 });
+
+                itemGroup.appendChild(itemDiv);
+                currentIndex++;
             }
+
+            parentElement.appendChild(itemGroup);
+        });
+    }
+
+    function drawRandomItems(imageNames) {
+        const selectedItems = document.querySelectorAll(".item.selected");
+        if (selectedItems.length === 0) {
+            alert("選択したアイテムがありません！");
+            return;
         }
 
-        function toggleAwakeningVisibility() {
-            const isChecked = document.getElementById("hideAwakeningCheckbox").checked;
-            const resultRanks = document.querySelectorAll(".result-rank");
-            resultRanks.forEach(rank => {
-                if (isChecked) {
-                    rank.style.display = "none";
-                } else {
-                    rank.style.display = "block";
-                }
-            });
-        }
+        const selectedIndexes = Array.from(selectedItems).map(item => parseInt(item.querySelector("img").dataset.index));
+        const randomResults = getRandomElements(selectedIndexes, 4);
 
-        function saveAwakeningState() {
-            const isChecked = document.getElementById("hideAwakeningCheckbox").checked;
-            localStorage.setItem("hideAwakeningChecked", JSON.stringify(isChecked));
-        }
+        const resultContainer = document.getElementById("resultContainer");
+        resultContainer.innerHTML = "";
 
-        function restoreAwakeningState() {
-            const isChecked = JSON.parse(localStorage.getItem("hideAwakeningChecked"));
-            if (isChecked) {
-                document.getElementById("hideAwakeningCheckbox").checked = true;
-                toggleAwakeningVisibility();
+        const isHideAwakeningChecked = document.getElementById("hideAwakeningCheckbox").checked;
+
+        randomResults.forEach(resultIndex => {
+            const resultDiv = document.createElement("div");
+            resultDiv.classList.add("result-item");
+
+            const resultImage = document.createElement("img");
+            resultImage.src = `images/item${resultIndex}.png`;
+            resultImage.alt = `アイテム${resultIndex}`;
+            resultDiv.appendChild(resultImage);
+
+            const resultName = document.createElement("div");
+            resultName.classList.add("result-name");
+            resultName.textContent = imageNames[resultIndex - 1];
+            resultDiv.appendChild(resultName);
+
+            if (!isHideAwakeningChecked) {
+                const ranks = ["S覚醒", "F覚醒", "M覚醒", "B覚醒", "D覚醒"];
+                const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
+                const resultRank = document.createElement("div");
+                resultRank.classList.add("result-rank", randomRank);
+                resultRank.textContent = randomRank;
+                resultDiv.appendChild(resultRank);
             }
+
+            resultContainer.appendChild(resultDiv);
+        });
+    }
+
+    function getRandomElements(arr, num) {
+        const shuffled = arr.slice();
+        let i = arr.length, temp, randomIndex;
+
+        while (i !== 0) {
+            randomIndex = Math.floor(Math.random() * i);
+            i--;
+            temp = shuffled[i];
+            shuffled[i] = shuffled[randomIndex];
+            shuffled[randomIndex] = temp;
         }
 
-        function getDrawButtonCount() {
-            return parseInt(localStorage.getItem("drawButtonCount")) || 0;
-        }
+        return shuffled.slice(0, num);
+    }
 
-        function saveDrawButtonCount(count) {
-            localStorage.setItem("drawButtonCount", count);
-        }
-    </script>
+    function saveSelection() {
+        const selectedItems = document.querySelectorAll(".item.selected");
+        const selectedIndexes = Array.from(selectedItems).map(item => parseInt(item.querySelector("img").dataset.index));
+        localStorage.setItem("selectedIndexes", JSON.stringify(selectedIndexes));
+    }
+
+    function restoreSelection() {
+        const savedIndexes = JSON.parse(localStorage.getItem("selectedIndexes")) || [];
+        const allItems = document.querySelectorAll(".item");
+        allItems.forEach(item => {
+            const itemIndex = parseInt(item.querySelector("img").dataset.index);
+            if (savedIndexes.includes(itemIndex)) {
+                item.classList.add("selected");
+                item.querySelector("img").style.filter = "brightness(100%)";
+            } else {
+                item.querySelector("img").style.filter = "brightness(50%)"; // 初期状態で選択されていないアイテムに灰色を適用
+            }
+        });
+    }
+
+    function saveAwakeningState() {
+        const hideAwakening = document.getElementById("hideAwakeningCheckbox").checked;
+        localStorage.setItem("hideAwakening", JSON.stringify(hideAwakening));
+    }
+
+    function restoreAwakeningState() {
+        const savedState = JSON.parse(localStorage.getItem("hideAwakening")) || false;
+        document.getElementById("hideAwakeningCheckbox").checked = savedState;
+    }
+
+    function toggleAwakeningVisibility() {
+        const isHideAwakeningChecked = document.getElementById("hideAwakeningCheckbox").checked;
+        const resultRanks = document.querySelectorAll(".result-rank");
+        resultRanks.forEach(rank => {
+            if (isHideAwakeningChecked) {
+                rank.style.display = "none";
+            } else {
+                rank.style.display = "block";
+            }
+        });
+    }
+
+    function getDrawButtonCount() {
+        const savedCount = localStorage.getItem("drawButtonCount");
+        return savedCount ? parseInt(savedCount) : 0;
+    }
+
+    function saveDrawButtonCount(count) {
+        localStorage.setItem("drawButtonCount", count);
+    }
+</script>
+
 </body>
 </html>
