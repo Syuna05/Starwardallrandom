@@ -45,6 +45,8 @@
             flex-direction: row;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .item-group .cost-label {
@@ -136,6 +138,66 @@
             margin-top: 20px;
             text-align: center;
             color: white;
+        }
+
+        /* レスポンシブデザイン */
+        @media screen and (max-width: 768px) {
+            h1 {
+                font-size: 24px;
+            }
+
+            .item-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .item img {
+                width: 70px;
+                height: 50px;
+            }
+
+            .item-name {
+                font-size: 12px;
+            }
+
+            #drawButton, .cost-draw-button {
+                font-size: 18px;
+                padding: 12px 25px;
+            }
+
+            #selectAllButton, #deselectAllButton {
+                font-size: 14px;
+                padding: 8px 18px;
+            }
+
+            #resultContainer img {
+                width: 120px;
+                height: 80px;
+            }
+
+            .count-display p {
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            #drawButton, .cost-draw-button {
+                font-size: 16px;
+                padding: 10px 20px;
+            }
+
+            #selectAllButton, #deselectAllButton {
+                font-size: 14px;
+                padding: 6px 15px;
+            }
+
+            .count-display p {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -386,21 +448,10 @@
 
         function saveDrawButtonCount(count) {
             localStorage.setItem("drawButtonCount", JSON.stringify(count));
-            localStorage.setItem("lastDrawTime", Date.now());
+            return count;
         }
 
         function getDrawButtonCount() {
-            const lastDrawTime = localStorage.getItem("lastDrawTime");
-            const currentTime = Date.now();
-
-            // 3時間経過した場合はカウントをリセット
-            if (lastDrawTime && currentTime - lastDrawTime > 3 * 60 * 60 * 1000) {
-                localStorage.removeItem("drawButtonCount");
-                localStorage.removeItem("lastDrawTime");
-                return 0;
-            }
-
-            // それ以外の場合、保存された回数を返す
             return JSON.parse(localStorage.getItem("drawButtonCount") || "0");
         }
     </script>
