@@ -13,7 +13,7 @@
             background-size: cover;
             background-position: center;
             color: white;
-            position: relative; /* 親要素に相対位置を設定 */
+            position: relative;
         }
 
         body::before {
@@ -23,12 +23,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* 背景を暗くする */
-            z-index: -1; /* 背景に影響を与えず他の要素の下に配置 */
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: -1;
         }
 
         h1, p {
-            color: white;  /* タイトルと説明文も白に */
+            color: white;
             text-align: center;
         }
 
@@ -42,15 +42,15 @@
 
         .item-group {
             display: flex;
-            flex-direction: row;  /* 横並びにする */
+            flex-direction: row;
             align-items: center;
             gap: 10px;
         }
 
         .item-group .cost-label {
-            font-size: 29px; /* ここで文字サイズを大きく変更 */
+            font-size: 29px;
             font-weight: bold;
-            margin-right: 10px; /* コストラベルを横並びに */
+            margin-right: 10px;
         }
 
         .item {
@@ -60,8 +60,8 @@
         }
 
         .item img {
-            width: 90px; /* 画像のサイズを100pxに調整 */
-            height: 70px; /* 画像のサイズを100pxに調整 */
+            width: 90px;
+            height: 70px;
             transition: filter 0.3s;
         }
 
@@ -80,16 +80,15 @@
         }
 
         #drawButton {
-            background-color: #4CAF50;  /* 抽選ボタンを緑に変更 */
+            background-color: #4CAF50;
             color: white;
-            font-size: 20px;  /* ボタンの文字サイズを少し大きく */
-            padding: 15px 30px;  /* ボタンのパディングを大きく */
+            font-size: 20px;
+            padding: 15px 30px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-left: 0px; /* 他のボタンとの距離を広げる */
-            margin-top: 50px; /* 上部の余白を少し追加 */
-            margin-bottom: 20px; /* 下部に余白を追加して間隔を空ける */
+            margin-top: 50px;
+            margin-bottom: 20px;
         }
 
         #selectAllButton, #deselectAllButton {
@@ -98,7 +97,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 20px; /* 上部の余白を追加 */
+            margin-top: 20px;
         }
 
         #resultContainer {
@@ -110,12 +109,8 @@
         }
 
         #resultContainer img {
-            width: 150px; /* 結果の画像も100pxに調整 */
+            width: 150px;
             height: 100px;
-        }
-
-        .select-all-button {
-            margin-top: 10px;
         }
 
         .result-item {
@@ -136,8 +131,8 @@
 
     <div class="button-container">
         <button id="drawButton">抽選</button>
-        <button id="selectAllButton" class="select-all-button">全選択</button> <!-- 全選択ボタン -->
-        <button id="deselectAllButton" class="select-all-button">全解除</button> <!-- 全解除ボタン -->
+        <button id="selectAllButton" class="select-all-button">全選択</button>
+        <button id="deselectAllButton" class="select-all-button">全解除</button>
     </div>
 
     <div id="resultContainer"></div>
@@ -146,7 +141,6 @@
         window.onload = function () {
             const itemContainer = document.getElementById("itemContainer");
 
-            // アイテムの名前と画像番号
             const imageNames = [
                 "グリフィン", "スズラン", "影", "キャヴァリー", "ラジエル", 
                 "エルフィン", "シュウウ", "ヒカリ", "ケルビム", 
@@ -157,27 +151,25 @@
                 "ローランド", "スノーウォル", "ヤミン", "カタリナ", "オーキッド"
             ];
 
-            // コスト設定
             const costs = ["30コス", "25コス", "20コス", "15コス"];
             const costRanges = {
-                30: 9,  // 30コスのアイテム数
-                25: 9,  // 25コスのアイテム数
-                20: 11, // 20コスのアイテム数（修正）
-                15: 5   // 15コスのアイテム数（修正）
+                30: 9, 
+                25: 9, 
+                20: 11, 
+                15: 5
             };
 
-            // 画像28と29（インデックス27と28）を20コスに移動するための調整
             const rearrangedImageNames = [
-                ...imageNames.slice(0, 27), // 1～27番目（そのまま）
-                imageNames[27],  // ザハロワ（28番目）を20コスに追加
-                imageNames[28],  // ダークスター（29番目）を20コスに追加
-                ...imageNames.slice(29) // 30番目以降（そのまま）
+                ...imageNames.slice(0, 27), 
+                imageNames[27], 
+                imageNames[28], 
+                ...imageNames.slice(29)
             ];
 
-            // アイテムを生成
             createItems(rearrangedImageNames, itemContainer, costs, costRanges);
 
-            // 抽選ボタンの処理
+            restoreSelection();
+
             document.getElementById("drawButton").addEventListener("click", function () {
                 const selectedItems = document.querySelectorAll(".item.selected");
                 if (selectedItems.length === 0) {
@@ -185,26 +177,21 @@
                     return;
                 }
 
-                // 選ばれたアイテムのインデックスを取得
                 const selectedIndexes = Array.from(selectedItems).map(item => parseInt(item.querySelector("img").dataset.index));
-                
-                // 4つランダムに選択
                 const randomResults = getRandomElements(selectedIndexes, 4);
 
-                // 結果を画像として表示
                 const resultContainer = document.getElementById("resultContainer");
-                resultContainer.innerHTML = ""; // 既存の結果をクリア
+                resultContainer.innerHTML = "";
 
                 randomResults.forEach(resultIndex => {
                     const resultDiv = document.createElement("div");
                     resultDiv.classList.add("result-item");
 
                     const resultImage = document.createElement("img");
-                    resultImage.src = `images/item${resultIndex}.png`;  // 結果の画像
+                    resultImage.src = `images/item${resultIndex}.png`;
                     resultImage.alt = `アイテム${resultIndex}`;
                     resultDiv.appendChild(resultImage);
 
-                    // 結果の名前と覚醒ランクも表示
                     const resultName = document.createElement("div");
                     resultName.classList.add("result-name");
                     resultName.textContent = rearrangedImageNames[resultIndex - 1];
@@ -221,7 +208,6 @@
                 });
             });
 
-            // 全選択ボタンの処理
             document.getElementById("selectAllButton").addEventListener("click", function () {
                 const allItems = document.querySelectorAll(".item");
                 allItems.forEach(item => {
@@ -229,9 +215,10 @@
                     const img = item.querySelector("img");
                     img.style.filter = "brightness(50%)";
                 });
+
+                saveSelection();
             });
 
-            // 全解除ボタンの処理
             document.getElementById("deselectAllButton").addEventListener("click", function () {
                 const allItems = document.querySelectorAll(".item");
                 allItems.forEach(item => {
@@ -239,10 +226,11 @@
                     const img = item.querySelector("img");
                     img.style.filter = "brightness(100%)";
                 });
+
+                saveSelection();
             });
         };
 
-        // アイテムを生成して並べる
         function createItems(imageNames, parentElement, costs, costRanges) {
             let groupIndex = 0;
             let itemGroup;
@@ -253,7 +241,6 @@
                 itemGroup = document.createElement("div");
                 itemGroup.classList.add("item-group");
 
-                // コストラベルを追加
                 const costLabel = document.createElement("div");
                 costLabel.classList.add("cost-label");
                 costLabel.textContent = cost;
@@ -267,13 +254,15 @@
                     itemDiv.classList.add("item");
 
                     const img = document.createElement("img");
-                    img.src = `images/item${currentIndex}.png`;  // 画像のパス
+                    img.src = `images/item${currentIndex}.png`;
                     img.alt = `アイテム${currentIndex}`;
                     img.dataset.index = currentIndex;
 
                     img.addEventListener("click", function () {
                         itemDiv.classList.toggle("selected");
                         img.style.filter = itemDiv.classList.contains("selected") ? "brightness(50%)" : "brightness(100%)";
+
+                        saveSelection();
                     });
 
                     const itemNameDiv = document.createElement("div");
@@ -289,10 +278,9 @@
             });
         }
 
-        // ランダムに指定数の要素を選択する関数
         function getRandomElements(arr, num) {
             const result = [];
-            const copiedArray = [...arr];  // 元の配列を変更しないようにコピー
+            const copiedArray = [...arr];
 
             while (result.length < num && copiedArray.length > 0) {
                 const randomIndex = Math.floor(Math.random() * copiedArray.length);
@@ -300,6 +288,30 @@
             }
 
             return result;
+        }
+
+        function saveSelection() {
+            const selectedItems = [];
+            const allItems = document.querySelectorAll(".item.selected");
+            allItems.forEach(item => {
+                selectedItems.push(parseInt(item.querySelector("img").dataset.index));
+            });
+
+            localStorage.setItem("selectedItems", JSON.stringify(selectedItems));
+        }
+
+        function restoreSelection() {
+            const selectedItems = JSON.parse(localStorage.getItem("selectedItems") || "[]");
+
+            const allItems = document.querySelectorAll(".item");
+            allItems.forEach(item => {
+                const itemIndex = parseInt(item.querySelector("img").dataset.index);
+                if (selectedItems.includes(itemIndex)) {
+                    item.classList.add("selected");
+                    const img = item.querySelector("img");
+                    img.style.filter = "brightness(50%)";
+                }
+            });
         }
     </script>
 </body>
