@@ -271,35 +271,35 @@
 
     <script>
     window.onload = function () {
-        const itemContainer = document.getElementById("itemContainer");
+    const itemContainer = document.getElementById("itemContainer");
 
-        const imageNames = [
-            "グリフィン", "スズラン", "影", "キャヴァリー", "ラジエル", 
-            "エルフィン", "シュウウ", "ヒカリ", "ケルビム","ライン","ロタ","イーザ" ,
-            "18号", "アンジェリス", "フリード", "シグナス", "アリス", "カゼ","ヴァルキア", "エヴァ", 
-            "轟雷", "シャープ", "スカイセーバー", "シャオリン", "稲", "ノーラ", "バーゼラルド" ,
-            "チンニ", "ザハロワ", "ダークスター", 
-            "セラフィム", "ヴァーチェ",  "エミカ", "スコーピオン", "ドーリア", 
-            "ヒビキ", "アイーダ", "スティレット", "ベータ", "デュカリオン", 
-            "カタリナ", "オーキッド", "スノーウォル", "ローランド", "ヤミン"
-        ];
+    const imageNames = [
+        "グリフィン", "スズラン", "影", "キャヴァリー", "ラジエル", 
+        "エルフィン", "シュウウ", "ヒカリ", "ケルビム", "ライン", "ロタ", "イーザ",
+        "18号", "アンジェリス", "フリード", "シグナス", "アリス", "カゼ", "ヴァルキア", "エヴァ", 
+        "轟雷", "シャープ", "スカイセーバー", "シャオリン", "稲", "ノーラ", "バーゼラルド", // 26, 27番
+        "チンニ", "ザハロワ", "ダークスター", 
+        "セラフィム", "ヴァーチェ", "エミカ", "スコーピオン", "ドーリア", 
+        "ヒビキ", "アイーダ", "スティレット", "ベータ", "デュカリオン", 
+        "カタリナ", "オーキッド", "スノーウォル", "ローランド", "ヤミン"
+    ];
 
-        const costs = ["30コス", "25コス", "20コス", "15コス"];
-        const costRanges = {
-            30: 12, 
-            25: 15, 
-            20: 13, 
-            15: 5
-        };
+    const costs = ["30コス", "25コス", "20コス", "15コス"];
+    const costRanges = {
+        30: 12, 
+        25: 15, 
+        20: 13, 
+        15: 5
+    };
 
-        const rearrangedImageNames = [
-            ...imageNames.slice(0, 27), 
-            imageNames[27], 
-            imageNames[28], 
-            ...imageNames.slice(29)
-        ];
+    const rearrangedImageNames = [
+        ...imageNames.slice(0, 26), 
+        imageNames[26],  // ノーラを26番目
+        imageNames[27],  // バーゼラルドを27番目
+        ...imageNames.slice(28)  // 28番目以降
+    ];
 
-        createItems(rearrangedImageNames, itemContainer, costs, costRanges);
+    createItems(rearrangedImageNames, itemContainer, costs, costRanges);
 
         restoreSelection();
         restoreAwakeningState();
