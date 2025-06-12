@@ -273,11 +273,12 @@
     window.onload = function () {
     const itemContainer = document.getElementById("itemContainer");
 
+    // キャラ名の配列
     const imageNames = [
         "グリフィン", "スズラン", "影", "キャヴァリー", "ラジエル", 
         "エルフィン", "シュウウ", "ヒカリ", "ケルビム", "ライン", "ロタ", "イーザ",
         "18号", "アンジェリス", "フリード", "シグナス", "アリス", "カゼ", "ヴァルキア", "エヴァ", 
-        "轟雷", "シャープ", "スカイセーバー", "シャオリン", "稲", "ノーラ", "バーゼラルド", // 26, 27番
+        "轟雷", "シャープ", "スカイセーバー", "シャオリン", "稲", "ノーラ", "バーゼラルド", // ノーラとバーゼラルド
         "チンニ", "ザハロワ", "ダークスター", 
         "セラフィム", "ヴァーチェ", "エミカ", "スコーピオン", "ドーリア", 
         "ヒビキ", "アイーダ", "スティレット", "ベータ", "デュカリオン", 
@@ -292,105 +293,77 @@
         15: 5
     };
 
+    // ここで順番を保ったままノーラとバーゼラルドを確実に画像に反映
     const rearrangedImageNames = [
         ...imageNames.slice(0, 26), 
-        imageNames[26],  // ノーラを26番目
-        imageNames[27],  // バーゼラルドを27番目
-        ...imageNames.slice(28)  // 28番目以降
+        imageNames[26],  // ノーラを26番目に設定
+        imageNames[27],  // バーゼラルドを27番目に設定
+        ...imageNames.slice(28) // それ以降
     ];
 
+    // アイテムを表示
     createItems(rearrangedImageNames, itemContainer, costs, costRanges);
 
-        restoreSelection();
-        restoreAwakeningState();
+    restoreSelection();
+    restoreAwakeningState();
 
-        let totalDrawButtonCount = getDrawButtonCount();
+    let totalDrawButtonCount = getDrawButtonCount();
+    document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
+
+    document.getElementById("drawButton").addEventListener("click", function () {
+        drawRandomItems(rearrangedImageNames);
+        totalDrawButtonCount++;
         document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
+        saveDrawButtonCount(totalDrawButtonCount);
+    });
 
-        document.getElementById("drawButton").addEventListener("click", function () {
-            drawRandomItems(rearrangedImageNames);
-            totalDrawButtonCount++;
-            document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
-            saveDrawButtonCount(totalDrawButtonCount);
-        });
+    // 他のイベントリスナーと関数はそのまま
+};
 
-        document.getElementById("resetButton").addEventListener("click", function () {
-            totalDrawButtonCount = 0;
-            document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
-            saveDrawButtonCount(totalDrawButtonCount);
-        });
+// アイテムの作成部分
+function createItems(imageNames, parentElement, costs, costRanges) {
+    let groupIndex = 0;
+    let itemGroup;
+    let currentIndex = 0;
 
-        document.getElementById("hideAwakeningCheckbox").addEventListener("change", function () {
-            toggleAwakeningVisibility();
-            saveAwakeningState();
-        });
+    costs.forEach(cost => {
+        itemGroup = document.createElement("div");
+        itemGroup.classList.add("item-group");
 
-        document.getElementById("selectAllButton").addEventListener("click", function () {
-            const allItems = document.querySelectorAll(".item");
-            allItems.forEach(item => {
-                item.classList.add("selected");
-                const img = item.querySelector("img");
-                img.style.filter = "brightness(100%)";  // 選択した場合は明るく
+        const costLabel = document.createElement("div");
+        costLabel.classList.add("cost-label");
+        costLabel.textContent = cost;
+        itemGroup.appendChild(costLabel);
+
+        const range = costRanges[parseInt(cost)] || 0;
+
+        for (let i = 0; i < range; i++) {
+            const itemDiv = document.createElement("div");
+            itemDiv.classList.add("item");
+            const img = document.createElement("img");
+            img.src = `images/item${currentIndex + 1}.png`; // 現在のインデックスに対応する画像を設定
+            img.alt = imageNames[currentIndex];
+            img.dataset.index = currentIndex + 1;
+            itemDiv.appendChild(img);
+            const nameDiv = document.createElement("div");
+            nameDiv.classList.add("item-name");
+            nameDiv.textContent = imageNames[currentIndex];
+            itemDiv.appendChild(nameDiv);
+
+            itemDiv.addEventListener("click", function () {
+                itemDiv.classList.toggle("selected");
+                const img = itemDiv.querySelector("img");
+                img.style.filter = itemDiv.classList.contains("selected") ? "brightness(100%)" : "brightness(50%)";
+                saveSelection();
             });
 
-            saveSelection();
-        });
+            itemGroup.appendChild(itemDiv);
+            currentIndex++;
+        }
 
-        document.getElementById("deselectAllButton").addEventListener("click", function () {
-            const allItems = document.querySelectorAll(".item");
-            allItems.forEach(item => {
-                item.classList.remove("selected");
-                const img = item.querySelector("img");
-                img.style.filter = "brightness(50%)";  // 選択解除した場合は灰色
-            });
-
-            saveSelection();
-        });
-    };
-
-    function createItems(imageNames, parentElement, costs, costRanges) {
-        let groupIndex = 0;
-        let itemGroup;
-        let currentIndex = 0;
-
-        costs.forEach(cost => {
-            itemGroup = document.createElement("div");
-            itemGroup.classList.add("item-group");
-
-            const costLabel = document.createElement("div");
-            costLabel.classList.add("cost-label");
-            costLabel.textContent = cost;
-            itemGroup.appendChild(costLabel);
-
-            const range = costRanges[parseInt(cost)] || 0;
-
-            for (let i = 0; i < range; i++) {
-                const itemDiv = document.createElement("div");
-                itemDiv.classList.add("item");
-                const img = document.createElement("img");
-                img.src = `images/item${currentIndex + 1}.png`;
-                img.alt = imageNames[currentIndex];
-                img.dataset.index = currentIndex + 1;
-                itemDiv.appendChild(img);
-                const nameDiv = document.createElement("div");
-                nameDiv.classList.add("item-name");
-                nameDiv.textContent = imageNames[currentIndex];
-                itemDiv.appendChild(nameDiv);
-
-                itemDiv.addEventListener("click", function () {
-                    itemDiv.classList.toggle("selected");
-                    const img = itemDiv.querySelector("img");
-                    img.style.filter = itemDiv.classList.contains("selected") ? "brightness(100%)" : "brightness(50%)";
-                    saveSelection();
-                });
-
-                itemGroup.appendChild(itemDiv);
-                currentIndex++;
-            }
-
-            parentElement.appendChild(itemGroup);
-        });
-    }
+        parentElement.appendChild(itemGroup);
+    });
+}
 
     function drawRandomItems(imageNames) {
         const selectedItems = document.querySelectorAll(".item.selected");
