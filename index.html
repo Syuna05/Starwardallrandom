@@ -1,3 +1,4 @@
+<!-- 以下、完全なコード -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -215,8 +216,11 @@
     };
 
     let secretUnlockSequence = ["ローランド", "スカイセーバー", "シグナス"];
+    let highUnlockSequence = ["シュウウ", "デュカリオン", "バーゼラルド", "シャープ"];
     let secretUnlockProgress = 0;
+    let highUnlockProgress = 0;
     let secretUnlocked = false;
+    let highUnlocked = false;
 
     function createItems(imageNames, parentElement, costs, costRanges) {
       let currentIndex = 0;
@@ -237,6 +241,9 @@
 
         if (cost === "20コス") {
           window.secretGroup = itemGroup;
+        }
+        if (cost === "25コス") {
+          window.highGroup = itemGroup;
         }
 
         parentElement.appendChild(itemGroup);
@@ -262,6 +269,7 @@
         itemDiv.classList.toggle("selected");
         img.style.filter = itemDiv.classList.contains("selected") ? "brightness(100%)" : "brightness(50%)";
         saveSelection();
+
         if (!secretUnlocked && name === secretUnlockSequence[secretUnlockProgress]) {
           secretUnlockProgress++;
           if (secretUnlockProgress === secretUnlockSequence.length) {
@@ -270,6 +278,15 @@
         } else if (name !== secretUnlockSequence[secretUnlockProgress]) {
           secretUnlockProgress = 0;
         }
+
+        if (!highUnlocked && name === highUnlockSequence[highUnlockProgress]) {
+          highUnlockProgress++;
+          if (highUnlockProgress === highUnlockSequence.length) {
+            unlockHighItem();
+          }
+        } else if (name !== highUnlockSequence[highUnlockProgress]) {
+          highUnlockProgress = 0;
+        }
       });
 
       return itemDiv;
@@ -277,12 +294,22 @@
 
     function unlockSecretItem() {
       const name = "押井";
-      const index = 999; // 適当な未使用 index
+      const index = 999;
       const secretDiv = createItemElement(name, index);
       secretDiv.querySelector("img").src = "images/押井.png";
       window.secretGroup.appendChild(secretDiv);
       secretUnlocked = true;
       alert("秘密キャラ「押井」が解放されました！");
+    }
+
+    function unlockHighItem() {
+      const name = "高山";
+      const index = 998;
+      const highDiv = createItemElement(name, index);
+      highDiv.querySelector("img").src = "images/高山.png";
+      window.highGroup.appendChild(highDiv);
+      highUnlocked = true;
+      alert("隠しキャラ「高山」が解放されました！");
     }
 
     function drawRandomItems(imageNames) {
@@ -298,8 +325,8 @@
         const wrap = document.createElement("div");
         wrap.classList.add("result-item");
         wrap.innerHTML = `
-          <img src="images/${idx === 999 ? 'oshii' : 'item' + idx}.png" alt="item${idx}">
-          <div class="result-name">${idx === 999 ? '押井' : imageNames[idx - 1]}</div>`;
+          <img src="images/${idx === 999 ? '押井' : idx === 998 ? 'takayama' : 'item' + idx}.png" alt="item${idx}">
+          <div class="result-name">${idx === 999 ? '押井' : idx === 998 ? '高山' : imageNames[idx - 1]}</div>`;
         if (!hideAwakening) {
           const ranks = ["S覚醒", "F覚醒", "M覚醒", "B覚醒", "D覚醒"];
           const r = ranks[Math.floor(Math.random() * ranks.length)];
