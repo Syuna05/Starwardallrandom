@@ -30,12 +30,15 @@
         }
 
         body::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,.55);
-            z-index: -1;
-        }
+    content: '';
+    position: fixed; /* ← fixed にしてスクロールしても覆うようにする */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7); /* ← 明度を0.7にアップ（より暗く） */
+    z-index: -1;
+}
 
         h1,p {text-align:center; margin:0.4em 0;}
 
@@ -43,7 +46,7 @@
            Layout Containers
         ========================*/
         .container {
-            padding-inline: 4vw; /* 呼吸スペース */
+            padding-inline: 4vw; /* スペース */
             margin-top: 1.25rem;
         }
 
