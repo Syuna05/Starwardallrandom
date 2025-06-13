@@ -1,3 +1,4 @@
+<!--コード -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -7,7 +8,7 @@
   <style>
     :root {
       --item-w: 90px;
-      --ギャップ: 10px;
+      --gap: 10px;
       --btn-radius: 6px;
     }
     html, body {
@@ -15,7 +16,7 @@
       margin: 0;
       font-family: Arial, sans-serif;
       color: #fff;
-      background: url("images/background.png") center/cover no-repeat;
+      background: url("images/background.png") center/cover no-repeat fixed;
       position: relative;
       overflow-x: hidden;
     }
@@ -27,18 +28,12 @@
       background-color: rgba(0, 0, 0, 0.7);
       z-index: -1;
     }
-    h1, p {
-      text-align: center;
-      margin: 0.4em 0;
-    }
-    .container {
-      padding-inline: 4vw;
-      margin-top: 1.25rem;
-    }
+    h1, p { text-align: center; margin: 0.4em 0; }
+    .container { padding-inline: 4vw; margin-top: 1.25rem; }
     .item-group {
       display: grid;
       grid-template-columns: repeat(auto-fill,minmax(var(--item-w),1fr));
-      gap: var(--ギャップ);
+      gap: var(--gap);
       margin-bottom: 2.25rem;
     }
     .item-group .cost-label {
@@ -46,36 +41,30 @@
       font-size: clamp(1.1rem, 2.5vw, 1.75rem);
       font-weight: 700;
       text-align: center;
-      margin-bottom: 0.25rem;
+      margin-bottom: .25rem;
     }
     .item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.35rem;
+      gap: .35rem;
       cursor: pointer;
-      user-select: none;
     }
     .item img {
       width: 100%;
-      aspect-ratio: 9 / 7;
+      aspect-ratio: 9/7;
       object-fit: cover;
       filter: brightness(50%);
-      transition: filter 0.3s;
+      transition: filter .3s;
       border-radius: 4px;
     }
-    .item.selected img {
-      filter: brightness(100%);
-    }
+    .item.selected img { filter: brightness(100%); }
     .item-name {
-      font-size: clamp(0.65rem, 2.6vw, 0.875rem);
+      font-size: clamp(.65rem, 2.6vw, .875rem);
       text-align: center;
       word-break: keep-all;
     }
-    .button-container {
-      text-align: center;
-      margin-top: 1.5rem;
-    }
+    .button-container { text-align: center; margin-top: 1.5rem; }
     button {
       border: none;
       cursor: pointer;
@@ -86,19 +75,16 @@
       background: #4caf50;
       color: #fff;
       font-size: clamp(1rem, 3vw, 1.25rem);
-      padding: 0.8em 1.6em;
+      padding: .8em 1.6em;
     }
     #selectAllButton, #deselectAllButton {
-      font-size: clamp(0.9rem, 2.4vw, 1rem);
-      padding: 0.55em 1.3em;
-      margin-inline: 0.3rem;
+      font-size: clamp(.9rem, 2.4vw, 1rem);
+      padding: .55em 1.3em;
+      margin-inline: .3rem;
       background: #3a3a3a;
       color: #fff;
     }
-    .checkbox-container {
-      text-align: center;
-      margin-top: 1.25rem;
-    }
+    .checkbox-container { text-align: center; margin-top: 1.25rem; }
     #resultContainer {
       display: flex;
       justify-content: center;
@@ -107,60 +93,44 @@
       margin-top: 2rem;
       padding-inline: 4vw;
     }
-    .result-item {
-      text-align: center;
-    }
+    .result-item { text-align: center; }
     #resultContainer img {
       width: clamp(110px, 35vw, 150px);
-      aspect-ratio: 3 / 2;
+      aspect-ratio: 3/2;
       object-fit: cover;
       border-radius: 6px;
     }
-    .result-name {
-      margin-top: 0.4rem;
-      font-size: 0.9rem;
-    }
-    .result-rank {
-      margin-top: 0.15rem;
-      font-size: 0.9rem;
-      font-weight: 700;
-    }
+    .result-name { margin-top: .4rem; font-size: .9rem; }
+    .result-rank { margin-top: .15rem; font-size: .9rem; font-weight: 700; }
     .result-rank.F覚醒 { color: #ff6666; }
     .result-rank.M覚醒 { color: #ffae42; }
     .result-rank.S覚醒 { color: #5ec8ff; }
     .result-rank.B覚醒 { color: #c0c0c0; }
     .result-rank.D覚醒 { color: #8aff8a; }
-    .count-display {
-      text-align: center;
-      margin-top: 1.5rem;
-      font-size: 0.95rem;
-    }
-    .count-display p {
-      margin: 0;
-    }
+    .count-display { text-align: center; margin-top: 1.5rem; font-size: .95rem; }
+    .count-display p { margin: 0; }
     #resetButton {
       position: fixed;
       bottom: 1.2rem; right: 1.2rem;
       background: red;
       color: #fff;
-      padding: 0.45rem 0.65rem;
-      font-size: 0.75rem;
+      padding: .45rem .65rem;
+      font-size: .75rem;
       border-radius: var(--btn-radius);
-      opacity: 0.8;
-      cursor: pointer;
+      opacity: .8;
     }
     @media (max-width: 768px) {
       :root { --item-w: 75px; }
       .container { padding-inline: 6vw; }
-      #resetButton { font-size: 0.65rem; padding: 0.35rem 0.55rem; }
+      #resetButton { font-size: .65rem; padding: .35rem .55rem; }
     }
     @media (max-width: 480px) {
       :root { --item-w: 65px; }
       h1 { font-size: 1.35rem; }
-      p { font-size: 0.85rem; }
+      p { font-size: .85rem; }
       #drawButton { width: 92%; max-width: 340px; }
-      .item-name { font-size: 0.7rem; }
-      .count-display { font-size: 0.85rem; }
+      .item-name { font-size: .7rem; }
+      .count-display { font-size: .85rem; }
     }
   </style>
 </head>
@@ -193,7 +163,6 @@
   <script>
     window.onload = function () {
       const itemContainer = document.getElementById("itemContainer");
-
       const imageNames = [
         "グリフィン", "スズラン", "影", "キャヴァリー", "ラジエル",
         "エルフィン", "シュウウ", "ヒカリ", "ケルビム", "ライン", "ロタ", "イーザ",
@@ -209,12 +178,10 @@
       const costRanges = { 30: 12, 25: 15, 20: 13, 15: 5 };
       let rearrangedImageNames = [...imageNames];
 
-      // ここで30コスのグループを保持しておくためにwindowに保存
       createItems(rearrangedImageNames, itemContainer, costs, costRanges);
       restoreSelection();
       restoreAwakeningState();
 
-      // 抽選ボタン回数表示
       let totalDrawButtonCount = getDrawButtonCount();
       document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
 
@@ -248,14 +215,15 @@
       });
     };
 
-    // 秘密キャラの順番指定 (ロタ→ラジエル→轟雷→バーゼラルド→エミカ)
-    const wibelUnlockSequence = ["ロタ", "ラジエル", "轟雷", "バーゼラルド", "エミカ"];
-    let wibelUnlockProgress = 0;
-    let wibelUnlocked = false;
+    let secretUnlockSequence = ["ローランド", "スカイセーバー", "シグナス"];
+    let highUnlockSequence = ["シュウウ", "デュカリオン", "バーゼラルド", "シャープ"];
+    let secretUnlockProgress = 0;
+    let highUnlockProgress = 0;
+    let secretUnlocked = false;
+    let highUnlocked = false;
 
     function createItems(imageNames, parentElement, costs, costRanges) {
       let currentIndex = 0;
-
       costs.forEach(cost => {
         const itemGroup = document.createElement("div");
         itemGroup.classList.add("item-group");
@@ -263,7 +231,6 @@
         costLabel.classList.add("cost-label");
         costLabel.textContent = cost;
         itemGroup.appendChild(costLabel);
-
         const range = costRanges[parseInt(cost)] || 0;
 
         for (let i = 0; i < range; i++) {
@@ -272,8 +239,11 @@
           currentIndex++;
         }
 
-        if (cost === "30コス") {
-          window.wibelGroup = itemGroup;  // ここで30コスグループを保存
+        if (cost === "20コス") {
+          window.secretGroup = itemGroup;
+        }
+        if (cost === "25コス") {
+          window.highGroup = itemGroup;
         }
 
         parentElement.appendChild(itemGroup);
@@ -288,7 +258,6 @@
       img.src = `images/item${index}.png`;
       img.alt = name;
       img.dataset.index = index;
-
       itemDiv.appendChild(img);
 
       const nameDiv = document.createElement("div");
@@ -301,174 +270,119 @@
         img.style.filter = itemDiv.classList.contains("selected") ? "brightness(100%)" : "brightness(50%)";
         saveSelection();
 
-        if (!wibelUnlocked && name === wibelUnlockSequence[wibelUnlockProgress]) {
-          wibelUnlockProgress++;
-          if (wibelUnlockProgress === wibelUnlockSequence.length) {
-            unlockWibelItem();
+        if (!secretUnlocked && name === secretUnlockSequence[secretUnlockProgress]) {
+          secretUnlockProgress++;
+          if (secretUnlockProgress === secretUnlockSequence.length) {
+            unlockSecretItem();
           }
-        } else if (name !== wibelUnlockSequence[wibelUnlockProgress]) {
-          wibelUnlockProgress = 0;
+        } else if (name !== secretUnlockSequence[secretUnlockProgress]) {
+          secretUnlockProgress = 0;
+        }
+
+        if (!highUnlocked && name === highUnlockSequence[highUnlockProgress]) {
+          highUnlockProgress++;
+          if (highUnlockProgress === highUnlockSequence.length) {
+            unlockHighItem();
+          }
+        } else if (name !== highUnlockSequence[highUnlockProgress]) {
+          highUnlockProgress = 0;
         }
       });
 
       return itemDiv;
     }
 
-    function unlockWibelItem() {
-      if (wibelUnlocked) return;
-      const name = "ウィーベル";
-      const index = 997; // 適当なID
-
-      const wibelDiv = document.createElement("div");
-      wibelDiv.classList.add("item");
-
-      const img = document.createElement("img");
-      img.src = "images/ウィーベル.png";
-      img.alt = name;
-      img.dataset.index = index;
-
-      wibelDiv.appendChild(img);
-
-      const nameDiv = document.createElement("div");
-      nameDiv.classList.add("item-name");
-      nameDiv.textContent = name;
-      wibelDiv.appendChild(nameDiv);
-
-      // 30コスグループに追加
-      if (window.wibelGroup) {
-        window.wibelGroup.appendChild(wibelDiv);
-      }
-
-      wibelUnlocked = true;
-      alert("隠しキャラ「ウィーベル」が解放されました！");
+    function unlockSecretItem() {
+      const name = "押井";
+      const index = 999;
+      const secretDiv = createItemElement(name, index);
+      secretDiv.querySelector("img").src = "images/押井.png";
+      window.secretGroup.appendChild(secretDiv);
+      secretUnlocked = true;
+      alert("秘密キャラ「押井」が解放されました！");
     }
 
-    // 抽選処理
+    function unlockHighItem() {
+      const name = "高山";
+      const index = 998;
+      const highDiv = createItemElement(name, index);
+      highDiv.querySelector("img").src = "images/高山.png";
+      window.highGroup.appendChild(highDiv);
+      highUnlocked = true;
+      alert("隠しキャラ「高山」が解放されました！");
+    }
+
     function drawRandomItems(imageNames) {
-      const selectedItems = [...document.querySelectorAll(".item.selected")];
-      const hideAwakening = !!document.getElementById("hideAwakeningCheckbox").checked;
+      const selectedItems = document.querySelectorAll(".item.selected");
+      if (!selectedItems.length) { alert("選択したアイテムがありません！"); return; }
+      const selectedIndexes = [...selectedItems].map(item => +item.querySelector("img").dataset.index);
+      const randomResults = getRandomElements(selectedIndexes, 4);
       const resultContainer = document.getElementById("resultContainer");
-
       resultContainer.innerHTML = "";
-
-      if (selectedItems.length === 0) {
-        alert("選択されたキャラがありません。");
-        return;
-      }
-
-      // 選択された画像のindexを取得
-      const selectedIndices = selectedItems.map(el => {
-        const img = el.querySelector("img");
-        return img ? parseInt(img.dataset.index) : null;
-      }).filter(v => v !== null);
-
-      // 3つランダムに選ぶ
-      const resultCount = 3;
-      let randomResults = [];
-      for (let i = 0; i < resultCount; i++) {
-        const idx = selectedIndices[Math.floor(Math.random() * selectedIndices.length)];
-        randomResults.push(idx);
-      }
+      const hideAwakening = document.getElementById("hideAwakeningCheckbox").checked;
 
       randomResults.forEach(idx => {
         const wrap = document.createElement("div");
         wrap.classList.add("result-item");
-        let imgSrc = "";
-        let imgAlt = "";
-        let nameText = "";
-
-        if (idx === 999) { // 押井（隠しキャラ例）
-          imgSrc = "images/押井.png";
-          imgAlt = "押井";
-          nameText = "押井";
-        } else if (idx === 998) { // 高山（隠しキャラ例）
-          imgSrc = "images/高山.png";
-          imgAlt = "高山";
-          nameText = "高山";
-        } else if (idx === 997) { // ウィーベル
-          imgSrc = "images/ウィーベル.png";
-          imgAlt = "ウィーベル";
-          nameText = "ウィーベル";
-        } else {
-          imgSrc = `images/item${idx}.png`;
-          imgAlt = imageNames[idx - 1] || "";
-          nameText = imageNames[idx - 1] || "";
-        }
-
         wrap.innerHTML = `
-          <img src="${imgSrc}" alt="${imgAlt}">
-          <div class="result-name">${nameText}</div>
-        `;
-
+          <img src="images/${idx === 999 ? '押井' : idx === 998 ? '高山' : 'item' + idx}.png" alt="item${idx}">
+          <div class="result-name">${idx === 999 ? '押井' : idx === 998 ? '高山' : imageNames[idx - 1]}</div>`;
         if (!hideAwakening) {
           const ranks = ["S覚醒", "F覚醒", "M覚醒", "B覚醒", "D覚醒"];
           const r = ranks[Math.floor(Math.random() * ranks.length)];
           wrap.innerHTML += `<div class="result-rank ${r}">${r}</div>`;
         }
-
         resultContainer.appendChild(wrap);
       });
     }
 
-    // 選択状態をlocalStorageに保存
-    function saveSelection() {
-      const selectedIndices = [...document.querySelectorAll(".item.selected")]
-        .map(el => {
-          const img = el.querySelector("img");
-          return img ? img.dataset.index : null;
-        }).filter(v => v !== null);
-      localStorage.setItem("selectedIndices", JSON.stringify(selectedIndices));
+    function getRandomElements(arr, n) {
+      const s = [...arr];
+      for (let i = s.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [s[i], s[j]] = [s[j], s[i]];
+      }
+      return s.slice(0, n);
     }
 
-    // 選択状態の復元
-    function restoreSelection() {
-      const saved = localStorage.getItem("selectedIndices");
-      if (!saved) return;
-      const selectedIndices = JSON.parse(saved);
+    function saveSelection() {
+      const idx = [...document.querySelectorAll(".item.selected img")].map(img => +img.dataset.index);
+      localStorage.setItem("selectedIndexes", JSON.stringify(idx));
+    }
 
-      document.querySelectorAll(".item").forEach(el => {
-        const img = el.querySelector("img");
-        if (img && selectedIndices.includes(img.dataset.index)) {
-          el.classList.add("selected");
-          img.style.filter = "brightness(100%)";
-        } else if (img) {
-          el.classList.remove("selected");
-          img.style.filter = "brightness(50%)";
+    function restoreSelection() {
+      const saved = JSON.parse(localStorage.getItem("selectedIndexes")) || [];
+      document.querySelectorAll(".item").forEach(item => {
+        const idx = +item.querySelector("img").dataset.index;
+        if (saved.includes(idx)) {
+          item.classList.add("selected");
+          item.querySelector("img").style.filter = "brightness(100%)";
         }
       });
     }
 
-    // 覚醒表示状態保存
     function saveAwakeningState() {
-      const hideAwakening = !!document.getElementById("hideAwakeningCheckbox").checked;
-      localStorage.setItem("hideAwakening", hideAwakening ? "1" : "0");
+      localStorage.setItem("hideAwakening", JSON.stringify(document.getElementById("hideAwakeningCheckbox").checked));
     }
 
-    // 覚醒表示状態復元
     function restoreAwakeningState() {
-      const saved = localStorage.getItem("hideAwakening");
-      if (saved === "1") {
-        document.getElementById("hideAwakeningCheckbox").checked = true;
-        toggleAwakeningVisibility();
-      }
+      const s = JSON.parse(localStorage.getItem("hideAwakening")) || false;
+      document.getElementById("hideAwakeningCheckbox").checked = s;
+      toggleAwakeningVisibility();
     }
 
-    // 覚醒表示切替
     function toggleAwakeningVisibility() {
-      const hideAwakening = !!document.getElementById("hideAwakeningCheckbox").checked;
-      document.querySelectorAll(".result-rank").forEach(el => {
-        el.style.display = hideAwakening ? "none" : "block";
-      });
+      const hide = document.getElementById("hideAwakeningCheckbox").checked;
+      document.querySelectorAll(".result-rank").forEach(el => el.style.display = hide ? "none" : "block");
     }
 
-    // 抽選ボタン押した回数の保存・取得
     function getDrawButtonCount() {
-      return parseInt(localStorage.getItem("drawButtonCount") || "0");
-    }
-    function saveDrawButtonCount(count) {
-      localStorage.setItem("drawButtonCount", count.toString());
+      return +localStorage.getItem("drawButtonCount") || 0;
     }
 
+    function saveDrawButtonCount(c) {
+      localStorage.setItem("drawButtonCount", c);
+    }
   </script>
 </body>
 </html>
