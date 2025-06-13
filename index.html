@@ -1,137 +1,166 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>星の翼ALLランダム抽選システム</title>
-  <style>
-    :root {
-      --item-w: 90px;
-      --gap: 10px;
-      --btn-radius: 6px;
-    }
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      color: #fff;
-      background: url("images/background.png") center/cover no-repeat fixed;
-      position: relative;
-      overflow-x: hidden;
-    }
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background-color: rgba(0, 0, 0, 0.7);
-      z-index: -1;
-    }
-    h1, p { text-align: center; margin: 0.4em 0; }
-    .container { padding-inline: 4vw; margin-top: 1.25rem; }
-    .item-group {
-      display: grid;
-      grid-template-columns: repeat(auto-fill,minmax(var(--item-w),1fr));
-      gap: var(--gap);
-      margin-bottom: 2.25rem;
-    }
-    .item-group .cost-label {
-      grid-column: 1 / -1;
-      font-size: clamp(1.1rem, 2.5vw, 1.75rem);
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: .25rem;
-    }
-    .item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .35rem;
-      cursor: pointer;
-    }
-    .item img {
-      width: 100%;
-      aspect-ratio: 9/7;
-      object-fit: cover;
-      filter: brightness(50%);
-      transition: filter .3s;
-      border-radius: 4px;
-    }
-    .item.selected img { filter: brightness(100%); }
-    .item-name {
-      font-size: clamp(.65rem, 2.6vw, .875rem);
-      text-align: center;
-      word-break: keep-all;
-    }
-    .button-container { text-align: center; margin-top: 1.5rem; }
-    button {
-      border: none;
-      cursor: pointer;
-      border-radius: var(--btn-radius);
-      font-weight: 600;
-    }
-    #drawButton, .cost-draw-button {
-      background: #4caf50;
-      color: #fff;
-      font-size: clamp(1rem, 3vw, 1.25rem);
-      padding: .8em 1.6em;
-    }
-    #selectAllButton, #deselectAllButton {
-      font-size: clamp(.9rem, 2.4vw, 1rem);
-      padding: .55em 1.3em;
-      margin-inline: .3rem;
-      background: #3a3a3a;
-      color: #fff;
-    }
-    .checkbox-container { text-align: center; margin-top: 1.25rem; }
-    #resultContainer {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-top: 2rem;
-      padding-inline: 4vw;
-    }
-    .result-item { text-align: center; }
-    #resultContainer img {
-      width: clamp(110px, 35vw, 150px);
-      aspect-ratio: 3/2;
-      object-fit: cover;
-      border-radius: 6px;
-    }
-    .result-name { margin-top: .4rem; font-size: .9rem; }
-    .result-rank { margin-top: .15rem; font-size: .9rem; font-weight: 700; }
-    .result-rank.F覚醒 { color: #ff6666; }
-    .result-rank.M覚醒 { color: #ffae42; }
-    .result-rank.S覚醒 { color: #5ec8ff; }
-    .result-rank.B覚醒 { color: #c0c0c0; }
-    .result-rank.D覚醒 { color: #8aff8a; }
-    .count-display { text-align: center; margin-top: 1.5rem; font-size: .95rem; }
-    .count-display p { margin: 0; }
-    #resetButton {
-      position: fixed;
-      bottom: 1.2rem; right: 1.2rem;
-      background: red;
-      color: #fff;
-      padding: .45rem .65rem;
-      font-size: .75rem;
-      border-radius: var(--btn-radius);
-      opacity: .8;
-    }
-    @media (max-width: 768px) {
-      :root { --item-w: 75px; }
-      .container { padding-inline: 6vw; }
-      #resetButton { font-size: .65rem; padding: .35rem .55rem; }
-    }
-    @media (max-width: 480px) {
-      :root { --item-w: 65px; }
-      h1 { font-size: 1.35rem; }
-      p { font-size: .85rem; }
-      #drawButton { width: 92%; max-width: 340px; }
-      .item-name { font-size: .7rem; }
-      .count-display { font-size: .85rem; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>星の翼ALLランダム抽選システム</title>
+<style>
+  :root {
+    --item-w: 90px;
+    --gap: 10px;
+    --btn-radius: 6px;
+  }
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    background: url("images/background.png") center/cover no-repeat;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: -1;
+  }
+  h1, p {
+    text-align: center;
+    margin: 0.4em 0;
+  }
+  .container {
+    padding-inline: 4vw;
+    margin-top: 1.25rem;
+  }
+  .item-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--item-w),1fr));
+    gap: var(--gap);
+    margin-bottom: 2.25rem;
+  }
+  .item-group .cost-label {
+    grid-column: 1 / -1;
+    font-size: clamp(1.1rem, 2.5vw, 1.75rem);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: .25rem;
+  }
+  .item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .35rem;
+    cursor: pointer;
+  }
+  .item img {
+    width: 100%;
+    aspect-ratio: 9/7;
+    object-fit: cover;
+    filter: brightness(50%);
+    transition: filter .3s;
+    border-radius: 4px;
+  }
+  .item.selected img {
+    filter: brightness(100%);
+  }
+  .item-name {
+    font-size: clamp(.65rem, 2.6vw, .875rem);
+    text-align: center;
+    word-break: keep-all;
+  }
+  .button-container {
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+  button {
+    border: none;
+    cursor: pointer;
+    border-radius: var(--btn-radius);
+    font-weight: 600;
+  }
+  #drawButton, .cost-draw-button {
+    background: #4caf50;
+    color: #fff;
+    font-size: clamp(1rem, 3vw, 1.25rem);
+    padding: .8em 1.6em;
+  }
+  #selectAllButton, #deselectAllButton {
+    font-size: clamp(.9rem, 2.4vw, 1rem);
+    padding: .55em 1.3em;
+    margin-inline: .3rem;
+    background: #3a3a3a;
+    color: #fff;
+  }
+  .checkbox-container {
+    text-align: center;
+    margin-top: 1.25rem;
+  }
+  #resultContainer {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-inline: 4vw;
+  }
+  .result-item {
+    text-align: center;
+  }
+  #resultContainer img {
+    width: clamp(110px, 35vw, 150px);
+    aspect-ratio: 3/2;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+  .result-name {
+    margin-top: .4rem;
+    font-size: .9rem;
+  }
+  .result-rank {
+    margin-top: .15rem;
+    font-size: .9rem;
+    font-weight: 700;
+  }
+  .result-rank.F覚醒 { color: #ff6666; }
+  .result-rank.M覚醒 { color: #ffae42; }
+  .result-rank.S覚醒 { color: #5ec8ff; }
+  .result-rank.B覚醒 { color: #c0c0c0; }
+  .result-rank.D覚醒 { color: #8aff8a; }
+  .count-display {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: .95rem;
+  }
+  .count-display p {
+    margin: 0;
+  }
+  #resetButton {
+    position: fixed;
+    bottom: 1.2rem; right: 1.2rem;
+    background: red;
+    color: #fff;
+    padding: .45rem .65rem;
+    font-size: .75rem;
+    border-radius: var(--btn-radius);
+    opacity: .8;
+  }
+  @media (max-width: 768px) {
+    :root { --item-w: 75px; }
+    .container { padding-inline: 6vw; }
+    #resetButton { font-size: .65rem; padding: .35rem .55rem; }
+  }
+  @media (max-width: 480px) {
+    :root { --item-w: 65px; }
+    h1 { font-size: 1.35rem; }
+    p { font-size: .85rem; }
+    #drawButton { width: 92%; max-width: 340px; }
+    .item-name { font-size: .7rem; }
+    .count-display { font-size: .85rem; }
+  }
+</style>
 </head>
 <body>
   <h1>星の翼ALLランダム抽選システム</h1>
@@ -159,229 +188,330 @@
 
   <button id="resetButton">リセット</button>
 
-  <script>
-    window.onload = function () {
-      const itemContainer = document.getElementById("itemContainer");
-      const imageNames = [
-        "グリフィン", "スズラン", "影", "キャヴァリー", "ラジエル",
-        "エルフィン", "シュウウ", "ヒカリ", "ケルビム", "ライン", "ロタ", "イーザ",
-        "18号", "アンジェリス", "フリード", "シグナス", "アリス", "カゼ", "ヴァルキア", "エヴァ",
-        "轟雷", "シャープ", "スカイセーバー", "シャオリン", "稲", "ノーラ", "バーゼラルド",
-        "チンニ", "ザハロワ", "ダークスター",
-        "セラフィム", "ヴァーチェ", "エミカ", "スコーピオン", "パラス",
-        "ヒビキ", "アイーダ", "スティレット", "デュカリオン", "ベータ",
-        "カタリナ", "オーキッド", "スノーウォル", "ローランド", "ヤミン"
-      ];
+<script>
+window.onload = function () {
+  const itemContainer = document.getElementById("itemContainer");
+  const imageNames = [
+    "グリフィン", "スズラン", "影", "キャヴァリー", "ラジエル",
+    "エルフィン", "シュウウ", "ヒカリ", "ケルビム", "ライン", "ロタ", "イーザ",
+    "18号", "アンジェリス", "フリード", "シグナス", "アリス", "カゼ", "ヴァルキア", "エヴァ",
+    "轟雷", "シャープ", "スカイセーバー", "シャオリン", "稲", "ノーラ", "バーゼラルド",
+    "チンニ", "ザハロワ", "ダークスター",
+    "セラフィム", "ヴァーチェ", "エミカ", "スコーピオン", "パラス",
+    "ヒビキ", "アイーダ", "スティレット", "デュカリオン", "ベータ",
+    "カタリナ", "オーキッド", "スノーウォル", "ローランド", "ヤミン"
+  ];
 
-      const costs = ["30コス", "25コス", "20コス", "15コス"];
-      const costRanges = { 30: 12, 25: 15, 20: 13, 15: 5 };
-      let rearrangedImageNames = [...imageNames];
+  const costs = ["30コス", "25コス", "20コス", "15コス"];
+  const costRanges = { 30: 12, 25: 15, 20: 13, 15: 5 };
+  let rearrangedImageNames = [...imageNames];
 
-      createItems(rearrangedImageNames, itemContainer, costs, costRanges);
-      restoreSelection();
-      restoreAwakeningState();
+  // 状態管理用変数
+  let secretUnlockSequence = ["ローランド", "スカイセーバー", "シグナス"];
+  let highUnlockSequence = ["シュウウ", "デュカリオン", "バーゼラルド", "シャープ"];
+  let secretUnlockProgress = 0;
+  let highUnlockProgress = 0;
+  let secretUnlocked = false;
+  let highUnlocked = false;
 
-      let totalDrawButtonCount = getDrawButtonCount();
-      document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
+  // 押井画像クリックカウンタ（押井解放後のみ）
+  let oshiiClickCount = 0;
 
-      document.getElementById("drawButton").addEventListener("click", () => {
-        drawRandomItems(rearrangedImageNames);
-        totalDrawButtonCount++;
-        document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
-        saveDrawButtonCount(totalDrawButtonCount);
-      });
+  createItems(rearrangedImageNames, itemContainer, costs, costRanges);
+  restoreSelection();
+  restoreAwakeningState();
+  restoreOshiiState();
 
-      document.getElementById("selectAllButton").addEventListener("click", () => {
-        document.querySelectorAll(".item").forEach(el => el.classList.add("selected"));
-        document.querySelectorAll(".item img").forEach(img => img.style.filter = "brightness(100%)");
-        saveSelection();
-      });
+  let totalDrawButtonCount = getDrawButtonCount();
+  updateDrawCountDisplay();
 
-      document.getElementById("deselectAllButton").addEventListener("click", () => {
-        document.querySelectorAll(".item").forEach(el => el.classList.remove("selected"));
-        document.querySelectorAll(".item img").forEach(img => img.style.filter = "brightness(50%)");
-        saveSelection();
-      });
+  // 抽選ボタン押下時
+  document.getElementById("drawButton").addEventListener("click", () => {
+    drawRandomItems(rearrangedImageNames);
+    totalDrawButtonCount++;
+    saveDrawButtonCount(totalDrawButtonCount);
+    updateDrawCountDisplay();
+  });
 
-      document.getElementById("resetButton").addEventListener("click", () => {
-        localStorage.clear();
-        location.reload();
-      });
-
-      document.getElementById("hideAwakeningCheckbox").addEventListener("change", () => {
-        saveAwakeningState();
-        toggleAwakeningVisibility();
-      });
-    };
-
-    let secretUnlockSequence = ["ローランド", "スカイセーバー", "シグナス"];
-    let highUnlockSequence = ["シュウウ", "デュカリオン", "バーゼラルド", "シャープ"];
-    let secretUnlockProgress = 0;
-    let highUnlockProgress = 0;
-    let secretUnlocked = false;
-    let highUnlocked = false;
-
-    function createItems(imageNames, parentElement, costs, costRanges) {
-      let currentIndex = 0;
-      costs.forEach(cost => {
-        const itemGroup = document.createElement("div");
-        itemGroup.classList.add("item-group");
-        const costLabel = document.createElement("div");
-        costLabel.classList.add("cost-label");
-        costLabel.textContent = cost;
-        itemGroup.appendChild(costLabel);
-        const range = costRanges[parseInt(cost)] || 0;
-
-        for (let i = 0; i < range; i++) {
-          const itemDiv = createItemElement(imageNames[currentIndex], currentIndex + 1);
-          itemGroup.appendChild(itemDiv);
-          currentIndex++;
-        }
-
-        if (cost === "20コス") {
-          window.secretGroup = itemGroup;
-        }
-        if (cost === "25コス") {
-          window.highGroup = itemGroup;
-        }
-
-        parentElement.appendChild(itemGroup);
-      });
-    }
-
-    function createItemElement(name, index) {
-      const itemDiv = document.createElement("div");
-      itemDiv.classList.add("item");
-
-      const img = document.createElement("img");
-      img.src = `images/item${index}.png`;
-      img.alt = name;
-      img.dataset.index = index;
-      itemDiv.appendChild(img);
-
-      const nameDiv = document.createElement("div");
-      nameDiv.classList.add("item-name");
-      nameDiv.textContent = name;
-      itemDiv.appendChild(nameDiv);
-
-      itemDiv.addEventListener("click", () => {
-        itemDiv.classList.toggle("selected");
-        img.style.filter = itemDiv.classList.contains("selected") ? "brightness(100%)" : "brightness(50%)";
-        saveSelection();
-
-        if (!secretUnlocked && name === secretUnlockSequence[secretUnlockProgress]) {
-          secretUnlockProgress++;
-          if (secretUnlockProgress === secretUnlockSequence.length) {
-            unlockSecretItem();
-          }
-        } else if (name !== secretUnlockSequence[secretUnlockProgress]) {
-          secretUnlockProgress = 0;
-        }
-
-        if (!highUnlocked && name === highUnlockSequence[highUnlockProgress]) {
-          highUnlockProgress++;
-          if (highUnlockProgress === highUnlockSequence.length) {
-            unlockHighItem();
-          }
-        } else if (name !== highUnlockSequence[highUnlockProgress]) {
-          highUnlockProgress = 0;
-        }
-      });
-
-      return itemDiv;
-    }
-
-    function unlockSecretItem() {
-      const name = "押井";
-      const index = 999;
-      const secretDiv = createItemElement(name, index);
-      secretDiv.querySelector("img").src = "images/押井.png";
-      window.secretGroup.appendChild(secretDiv);
-      secretUnlocked = true;
-      alert("秘密キャラ「押井」が解放されました！");
-    }
-
-    function unlockHighItem() {
-      const name = "高山";
-      const index = 998;
-      const highDiv = createItemElement(name, index);
-      highDiv.querySelector("img").src = "images/高山.png";
-      window.highGroup.appendChild(highDiv);
-      highUnlocked = true;
-      alert("隠しキャラ「高山」が解放されました！");
-    }
-
-    function drawRandomItems(imageNames) {
-      const selectedItems = document.querySelectorAll(".item.selected");
-      if (!selectedItems.length) { alert("選択したアイテムがありません！"); return; }
-      const selectedIndexes = [...selectedItems].map(item => +item.querySelector("img").dataset.index);
-      const randomResults = getRandomElements(selectedIndexes, 4);
-      const resultContainer = document.getElementById("resultContainer");
-      resultContainer.innerHTML = "";
-      const hideAwakening = document.getElementById("hideAwakeningCheckbox").checked;
-
-      randomResults.forEach(idx => {
-        const wrap = document.createElement("div");
-        wrap.classList.add("result-item");
-        wrap.innerHTML = `
-          <img src="images/${idx === 999 ? '押井' : idx === 998 ? '高山' : 'item' + idx}.png" alt="item${idx}">
-          <div class="result-name">${idx === 999 ? '押井' : idx === 998 ? '高山' : imageNames[idx - 1]}</div>`;
-        if (!hideAwakening) {
-          const ranks = ["S覚醒", "F覚醒", "M覚醒", "B覚醒", "D覚醒"];
-          const r = ranks[Math.floor(Math.random() * ranks.length)];
-          wrap.innerHTML += `<div class="result-rank ${r}">${r}</div>`;
-        }
-        resultContainer.appendChild(wrap);
-      });
-    }
-
-    function getRandomElements(arr, n) {
-      const s = [...arr];
-      for (let i = s.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [s[i], s[j]] = [s[j], s[i]];
+  // 全選択
+  document.getElementById("selectAllButton").addEventListener("click", () => {
+    document.querySelectorAll(".item").forEach(el => {
+      if(!el.classList.contains("disabled")) {
+        el.classList.add("selected");
+        el.querySelector("img").style.filter = "brightness(100%)";
       }
-      return s.slice(0, n);
-    }
+    });
+    saveSelection();
+  });
 
-    function saveSelection() {
-      const idx = [...document.querySelectorAll(".item.selected img")].map(img => +img.dataset.index);
-      localStorage.setItem("selectedIndexes", JSON.stringify(idx));
-    }
+  // 全解除
+  document.getElementById("deselectAllButton").addEventListener("click", () => {
+    document.querySelectorAll(".item").forEach(el => {
+      if(!el.classList.contains("disabled")) {
+        el.classList.remove("selected");
+        el.querySelector("img").style.filter = "brightness(50%)";
+      }
+    });
+    saveSelection();
+  });
 
-    function restoreSelection() {
-      const saved = JSON.parse(localStorage.getItem("selectedIndexes")) || [];
-      document.querySelectorAll(".item").forEach(item => {
-        const idx = +item.querySelector("img").dataset.index;
-        if (saved.includes(idx)) {
-          item.classList.add("selected");
-          item.querySelector("img").style.filter = "brightness(100%)";
+  // リセット
+  document.getElementById("resetButton").addEventListener("click", () => {
+    localStorage.clear();
+    location.reload();
+  });
+
+  // 覚醒表示切替
+  document.getElementById("hideAwakeningCheckbox").addEventListener("change", () => {
+    saveAwakeningState();
+    toggleAwakeningVisibility();
+  });
+
+  // --- 関数定義 ---
+
+  // アイテム生成
+  function createItems(imageNames, parentElement, costs, costRanges) {
+    let currentIndex = 0;
+    costs.forEach(cost => {
+      const itemGroup = document.createElement("div");
+      itemGroup.classList.add("item-group");
+
+      const costLabel = document.createElement("div");
+      costLabel.classList.add("cost-label");
+      costLabel.textContent = cost;
+      itemGroup.appendChild(costLabel);
+
+      const range = costRanges[parseInt(cost)] || 0;
+      for (let i = 0; i < range; i++) {
+        const itemDiv = createItemElement(imageNames[currentIndex], currentIndex + 1);
+        itemGroup.appendChild(itemDiv);
+        currentIndex++;
+      }
+
+      if (cost === "20コス") {
+        window.secretGroup = itemGroup;
+      }
+      if (cost === "25コス") {
+        window.highGroup = itemGroup;
+      }
+
+      parentElement.appendChild(itemGroup);
+    });
+  }
+
+  // アイテム要素作成
+  function createItemElement(name, index) {
+    const itemDiv = document.createElement("div");
+    itemDiv.classList.add("item");
+
+    const img = document.createElement("img");
+    img.src = `images/item${index}.png`;
+    img.alt = name;
+    img.dataset.index = index;
+    itemDiv.appendChild(img);
+
+    const nameDiv = document.createElement("div");
+    nameDiv.classList.add("item-name");
+    nameDiv.textContent = name;
+    itemDiv.appendChild(nameDiv);
+
+    // クリック時処理
+    itemDiv.addEventListener("click", () => {
+      // 押井全体変化中は選択禁止
+      if (oshiiModeActive()) return;
+
+      itemDiv.classList.toggle("selected");
+      img.style.filter = itemDiv.classList.contains("selected") ? "brightness(100%)" : "brightness(50%)";
+      saveSelection();
+
+      // 秘密キャラ解放処理
+      if (!secretUnlocked && name === secretUnlockSequence[secretUnlockProgress]) {
+        secretUnlockProgress++;
+        if (secretUnlockProgress >= secretUnlockSequence.length) {
+          unlockSecretItem();
+        }
+      }
+
+      // 高コスト解除シーケンス
+      if (!highUnlocked && name === highUnlockSequence[highUnlockProgress]) {
+        highUnlockProgress++;
+        if (highUnlockProgress >= highUnlockSequence.length) {
+          unlockHighCostItems();
+        }
+      }
+    });
+
+    return itemDiv;
+  }
+
+  // 押井全画面変化モードか判定
+  function oshiiModeActive() {
+    return document.body.classList.contains("oshii-mode");
+  }
+
+  // 秘密キャラ「押井」解放
+  function unlockSecretItem() {
+    const name = "押井";
+    const index = 999; // 存在しないindexで特別扱い
+    const secretDiv = createItemElement(name, index);
+    const img = secretDiv.querySelector("img");
+    img.src = "images/押井.png";
+    window.secretGroup.appendChild(secretDiv);
+    secretUnlocked = true;
+    alert("秘密キャラ「押井」が解放されました！");
+
+    // 押井画像クリックでカウントアップイベント追加
+    img.addEventListener("click", () => {
+      oshiiClickCount++;
+      if (oshiiClickCount === 10) {
+        transformAllToOshii();
+      }
+    });
+  }
+
+  // 高コスト解除処理
+  function unlockHighCostItems() {
+    // 高コスト解除の処理が必要ならここに追加
+    highUnlocked = true;
+    alert("高コストキャラが解放されました！");
+  }
+
+  // 全キャラを押井に変える
+  function transformAllToOshii() {
+    if (oshiiModeActive()) return; // 既に変換中は処理しない
+
+    document.body.classList.add("oshii-mode");
+    const items = document.querySelectorAll(".item");
+    items.forEach(item => {
+      const img = item.querySelector("img");
+      img.src = "images/押井.png";
+      const nameDiv = item.querySelector(".item-name");
+      nameDiv.textContent = "押井";
+    });
+
+    // 結果エリアも同様に変える（表示されていれば）
+    const results = document.querySelectorAll("#resultContainer .result-item");
+    results.forEach(resultItem => {
+      const img = resultItem.querySelector("img");
+      img.src = "images/押井.png";
+      const nameDiv = resultItem.querySelector(".result-name");
+      nameDiv.textContent = "押井";
+    });
+
+    alert("すべてのキャラが「押井」に変わりました！");
+  }
+
+  // 抽選処理（例）
+  function drawRandomItems(availableNames) {
+    const selectedItems = document.querySelectorAll(".item.selected");
+    if (selectedItems.length === 0) {
+      alert("キャラを1つ以上選択してください。");
+      return;
+    }
+    const resultContainer = document.getElementById("resultContainer");
+    resultContainer.innerHTML = "";
+
+    // 1つだけランダム抽選（変更可）
+    const randomIndex = Math.floor(Math.random() * selectedItems.length);
+    const selectedItem = selectedItems[randomIndex];
+    const imgSrc = selectedItem.querySelector("img").src;
+    const nameText = selectedItem.querySelector(".item-name").textContent;
+
+    // 結果表示
+    const resultItem = document.createElement("div");
+    resultItem.classList.add("result-item");
+
+    const img = document.createElement("img");
+    img.src = imgSrc;
+    img.alt = nameText;
+    resultItem.appendChild(img);
+
+    const nameDiv = document.createElement("div");
+    nameDiv.classList.add("result-name");
+    nameDiv.textContent = nameText;
+    resultItem.appendChild(nameDiv);
+
+    resultContainer.appendChild(resultItem);
+  }
+
+  // 選択状態をlocalStorageに保存
+  function saveSelection() {
+    const selections = [];
+    document.querySelectorAll(".item").forEach(item => {
+      const selected = item.classList.contains("selected");
+      const name = item.querySelector(".item-name").textContent;
+      selections.push({ name, selected });
+    });
+    localStorage.setItem("selectionState", JSON.stringify(selections));
+  }
+
+  // 選択状態復元
+  function restoreSelection() {
+    const saved = localStorage.getItem("selectionState");
+    if (!saved) return;
+    try {
+      const arr = JSON.parse(saved);
+      arr.forEach((obj, i) => {
+        const item = document.querySelectorAll(".item")[i];
+        if (item) {
+          if (obj.selected) {
+            item.classList.add("selected");
+            item.querySelector("img").style.filter = "brightness(100%)";
+          } else {
+            item.classList.remove("selected");
+            item.querySelector("img").style.filter = "brightness(50%)";
+          }
         }
       });
+    } catch (e) {
+      console.error("選択状態復元に失敗しました", e);
     }
+  }
 
-    function saveAwakeningState() {
-      localStorage.setItem("hideAwakening", JSON.stringify(document.getElementById("hideAwakeningCheckbox").checked));
-    }
+  // 覚醒表示のON/OFF保存
+  function saveAwakeningState() {
+    const checked = document.getElementById("hideAwakeningCheckbox").checked;
+    localStorage.setItem("awakeningHidden", checked ? "true" : "false");
+  }
 
-    function restoreAwakeningState() {
-      const s = JSON.parse(localStorage.getItem("hideAwakening")) || false;
-      document.getElementById("hideAwakeningCheckbox").checked = s;
-      toggleAwakeningVisibility();
+  // 覚醒表示復元
+  function restoreAwakeningState() {
+    const val = localStorage.getItem("awakeningHidden");
+    if (val === "true") {
+      document.getElementById("hideAwakeningCheckbox").checked = true;
+    } else {
+      document.getElementById("hideAwakeningCheckbox").checked = false;
     }
+    toggleAwakeningVisibility();
+  }
 
-    function toggleAwakeningVisibility() {
-      const hide = document.getElementById("hideAwakeningCheckbox").checked;
-      document.querySelectorAll(".result-rank").forEach(el => el.style.display = hide ? "none" : "block");
-    }
+  // 覚醒表示切替処理
+  function toggleAwakeningVisibility() {
+    const checked = document.getElementById("hideAwakeningCheckbox").checked;
+    // ここで覚醒表示のDOM操作があれば追加
+  }
 
-    function getDrawButtonCount() {
-      return +localStorage.getItem("drawButtonCount") || 0;
-    }
+  // 押井状態の復元（押井解放後のクリックカウントはリセットで戻るので初期化のみ）
+  function restoreOshiiState() {
+    oshiiClickCount = 0;
+  }
 
-    function saveDrawButtonCount(c) {
-      localStorage.setItem("drawButtonCount", c);
-    }
-  </script>
+  // 抽選ボタン押下回数取得
+  function getDrawButtonCount() {
+    const count = localStorage.getItem("drawButtonCount");
+    return count ? parseInt(count) : 0;
+  }
+  // 抽選ボタン押下回数保存
+  function saveDrawButtonCount(count) {
+    localStorage.setItem("drawButtonCount", count);
+  }
+  // 抽選ボタン押下回数表示更新
+  function updateDrawCountDisplay() {
+    document.getElementById("totalDrawButtonCount").textContent = `ボタンを押した回数: ${totalDrawButtonCount}`;
+  }
+
+};
+</script>
+
 </body>
 </html>
