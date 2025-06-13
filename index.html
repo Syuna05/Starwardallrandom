@@ -216,10 +216,13 @@
 
     let secretUnlockSequence = ["ローランド", "スカイセーバー", "シグナス"];
     let highUnlockSequence = ["シュウウ", "デュカリオン", "バーゼラルド", "シャープ"];
+    let midoriUnlockSequence = ["バーゼラルド", "轟雷", "ラジエル", "ロタ", "エミカ"];
+    let midoriUnlockProgress = 0;
     let secretUnlockProgress = 0;
     let highUnlockProgress = 0;
     let secretUnlocked = false;
     let highUnlocked = false;
+    let midoriUnlocked = false;
 
     function createItems(imageNames, parentElement, costs, costRanges) {
       let currentIndex = 0;
@@ -277,6 +280,15 @@
         } else if (name !== secretUnlockSequence[secretUnlockProgress]) {
           secretUnlockProgress = 0;
         }
+        
+        if (!midoriUnlocked && name === midoriUnlockSequence[midoriUnlockProgress]) {
+  midoriUnlockProgress++;
+  if (midoriUnlockProgress === midoriUnlockSequence.length) {
+    unlockMidori();
+  }
+} else if (name !== midoriUnlockSequence[midoriUnlockProgress]) {
+  midoriUnlockProgress = 0;
+}
 
         if (!highUnlocked && name === highUnlockSequence[highUnlockProgress]) {
           highUnlockProgress++;
@@ -310,6 +322,16 @@
       highUnlocked = true;
       alert("隠しキャラ「高山」が解放されました！");
     }
+    
+    function unlockMidori() {
+  const name = "ウィーベル";
+  const index = 997;
+  const midoriDiv = createItemElement(name, index);
+  midoriDiv.querySelector("img").src = "images/ウィーベル.png";
+  document.querySelectorAll(".item-group")[0].appendChild(midoriDiv); // 30コス枠（最初のgroup）
+  midoriUnlocked = true;
+  alert("神キャラ「ウィーベル」が解放されました！");
+}
 
     function drawRandomItems(imageNames) {
       const selectedItems = document.querySelectorAll(".item.selected");
@@ -324,8 +346,9 @@
         const wrap = document.createElement("div");
         wrap.classList.add("result-item");
         wrap.innerHTML = `
-          <img src="images/${idx === 999 ? '押井' : idx === 998 ? '高山' : 'item' + idx}.png" alt="item${idx}">
-          <div class="result-name">${idx === 999 ? '押井' : idx === 998 ? '高山' : imageNames[idx - 1]}</div>`;
+          <img src="images/${idx === 999 ? '押井' : idx === 998 ? '高山' : idx === 997 ? 'ウィーベル' : 'item' + idx}.png" alt="item${idx}">
+          <div class="result-name">${idx === 999 ? '押井' : idx === 998 ? '高山' : idx === 997 ? 'ウィーベル' : imageNames[idx - 1]}</div>
+
         if (!hideAwakening) {
           const ranks = ["S覚醒", "F覚醒", "M覚醒", "B覚醒", "D覚醒"];
           const r = ranks[Math.floor(Math.random() * ranks.length)];
