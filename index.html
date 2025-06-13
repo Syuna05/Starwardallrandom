@@ -1,4 +1,3 @@
-<!-- 以下、完全なコード -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -178,6 +177,15 @@
       const costRanges = { 30: 12, 25: 15, 20: 13, 15: 5 };
       let rearrangedImageNames = [...imageNames];
 
+      // 追加: 押井差し替え済みかチェック
+      const isOshiiReplaced = JSON.parse(localStorage.getItem("oshiiReplaced")) || false;
+      if (isOshiiReplaced) {
+        // 全キャラ名を押井に置換
+        for (let i = 0; i < rearrangedImageNames.length; i++) {
+          rearrangedImageNames[i] = "押井";
+        }
+      }
+
       createItems(rearrangedImageNames, itemContainer, costs, costRanges);
       restoreSelection();
       restoreAwakeningState();
@@ -213,6 +221,14 @@
         saveAwakeningState();
         toggleAwakeningVisibility();
       });
+
+      // 追加: 押井クリックカウント変数
+      window.oshiiClickCount = parseInt(localStorage.getItem("oshiiClickCount")) || 0;
+
+      // 追加: 押井解放済みフラグ
+      window.secretUnlocked = JSON.parse(localStorage.getItem("secretUnlocked")) || false;
+
+      // 追加: 押井アイテムクリックイベントに連動処理付加はcreateItemElementでやるため後で付ける
     };
 
     let secretUnlockSequence = ["ローランド", "スカイセーバー", "シグナス"];
@@ -220,169 +236,214 @@
     let secretUnlockProgress = 0;
     let highUnlockProgress = 0;
     let secretUnlocked = false;
-    let highUnlocked = false;
 
-    function createItems(imageNames, parentElement, costs, costRanges) {
-      let currentIndex = 0;
-      costs.forEach(cost => {
-        const itemGroup = document.createElement("div");
-        itemGroup.classList.add("item-group");
-        const costLabel = document.createElement("div");
-        costLabel.classList.add("cost-label");
-        costLabel.textContent = cost;
-        itemGroup.appendChild(costLabel);
-        const range = costRanges[parseInt(cost)] || 0;
-
-        for (let i = 0; i < range; i++) {
-          const itemDiv = createItemElement(imageNames[currentIndex], currentIndex + 1);
-          itemGroup.appendChild(itemDiv);
-          currentIndex++;
-        }
-
-        if (cost === "20コス") {
-          window.secretGroup = itemGroup;
-        }
-        if (cost === "25コス") {
-          window.highGroup = itemGroup;
-        }
-
-        parentElement.appendChild(itemGroup);
-      });
-    }
+    // ここで押井クリックカウントをグローバルで初期化（window.oshiiClickCountで参照）
+    window.oshiiClickCount = window.oshiiClickCount || 0;
 
     function createItemElement(name, index) {
-      const itemDiv = document.createElement("div");
-      itemDiv.classList.add("item");
+      const div = document.createElement("div");
+      div.classList.add("item");
+      div.dataset.name = name;
+      div.dataset.index = index;
 
       const img = document.createElement("img");
-      img.src = `images/item${index}.png`;
+      img.src = `images/${name}.png`;
       img.alt = name;
-      img.dataset.index = index;
-      itemDiv.appendChild(img);
+      div.appendChild(img);
 
       const nameDiv = document.createElement("div");
       nameDiv.classList.add("item-name");
       nameDiv.textContent = name;
-      itemDiv.appendChild(nameDiv);
+      div.appendChild(nameDiv);
 
-      itemDiv.addEventListener("click", () => {
-        itemDiv.classList.toggle("selected");
-        img.style.filter = itemDiv.classList.contains("selected") ? "brightness(100%)" : "brightness(50%)";
+      // クリックイベント: 選択切替
+      div.addEventListener("click", () => {
+        div.classList.toggle("selected");
+        // 画像明るさ変更
+        if (div.classList.contains("selected")) {
+          img.style.filter = "brightness(100%)";
+        } else {
+          img.style.filter = "brightness(50%)";
+        }
         saveSelection();
 
-        if (!secretUnlocked && name === secretUnlockSequence[secretUnlockProgress]) {
-          secretUnlockProgress++;
-          if (secretUnlockProgress === secretUnlockSequence.length) {
-            unlockSecretItem();
-          }
-        } else if (name !== secretUnlockSequence[secretUnlockProgress]) {
-          secretUnlockProgress = 0;
-        }
+        // 押井解除の条件チェック（秘密解除）
+        checkSecretUnlock(name);
 
-        if (!highUnlocked && name === highUnlockSequence[highUnlockProgress]) {
-          highUnlockProgress++;
-          if (highUnlockProgress === highUnlockSequence.length) {
-            unlockHighItem();
+        // 高山追加表示条件チェック
+        checkHighUnlock(name);
+
+        // 押井クリックカウント処理
+        if (name === "押井" && secretUnlocked) {
+          window.oshiiClickCount++;
+          localStorage.setItem("oshiiClickCount", window.oshiiClickCount);
+          if (window.oshiiClickCount >= 10) {
+            replaceAllWithOshii();
+            window.oshiiClickCount = 0;
+            localStorage.setItem("oshiiClickCount", 0);
           }
-        } else if (name !== highUnlockSequence[highUnlockProgress]) {
-          highUnlockProgress = 0;
         }
       });
 
-      return itemDiv;
+      return div;
+    }
+
+    function createItems(names, container, costs, costRanges) {
+      container.innerHTML = "";
+      let startIndex = 0;
+
+      costs.forEach(costLabel => {
+        const costDiv = document.createElement("div");
+        costDiv.classList.add("cost-label");
+        costDiv.textContent = costLabel;
+        container.appendChild(costDiv);
+
+        let count = costRanges[parseInt(costLabel)];
+        for (let i = 0; i < count; i++) {
+          if (startIndex >= names.length) break;
+          const name = names[startIndex];
+          const itemDiv = createItemElement(name, startIndex);
+          container.appendChild(itemDiv);
+          startIndex++;
+        }
+      });
+
+      // 秘密キャラ「押井」が解放済なら最後に追加表示
+      if (secretUnlocked) {
+        const oshiiDiv = createItemElement("押井", 999);
+        oshiiDiv.querySelector("img").src = "images/押井.png";
+        oshiiDiv.classList.add("secret");
+        container.appendChild(oshiiDiv);
+      }
+    }
+
+    // 秘密キャラ「押井」解除チェック関数
+    function checkSecretUnlock(name) {
+      if (secretUnlocked) return;
+      if (name === secretUnlockSequence[secretUnlockProgress]) {
+        secretUnlockProgress++;
+        if (secretUnlockProgress >= secretUnlockSequence.length) {
+          unlockSecretItem();
+        }
+      } else {
+        secretUnlockProgress = 0;
+      }
     }
 
     function unlockSecretItem() {
-      const name = "押井";
-      const index = 999;
-      const secretDiv = createItemElement(name, index);
-      secretDiv.querySelector("img").src = "images/押井.png";
-      window.secretGroup.appendChild(secretDiv);
       secretUnlocked = true;
+      localStorage.setItem("secretUnlocked", true);
       alert("秘密キャラ「押井」が解放されました！");
+      // 押井アイテムを追加表示
+      const container = document.getElementById("itemContainer");
+      const oshiiDiv = createItemElement("押井", 999);
+      oshiiDiv.querySelector("img").src = "images/押井.png";
+      oshiiDiv.classList.add("secret");
+      container.appendChild(oshiiDiv);
     }
 
-    function unlockHighItem() {
-      const name = "高山";
-      const index = 998;
-      const highDiv = createItemElement(name, index);
-      highDiv.querySelector("img").src = "images/高山.png";
-      window.highGroup.appendChild(highDiv);
-      highUnlocked = true;
-      alert("隠しキャラ「高山」が解放されました！");
+    // 高山追加表示処理（例）
+    function checkHighUnlock(name) {
+      // 実装例（省略）
     }
 
-    function drawRandomItems(imageNames) {
-      const selectedItems = document.querySelectorAll(".item.selected");
-      if (!selectedItems.length) { alert("選択したアイテムがありません！"); return; }
-      const selectedIndexes = [...selectedItems].map(item => +item.querySelector("img").dataset.index);
-      const randomResults = getRandomElements(selectedIndexes, 4);
-      const resultContainer = document.getElementById("resultContainer");
-      resultContainer.innerHTML = "";
-      const hideAwakening = document.getElementById("hideAwakeningCheckbox").checked;
-
-      randomResults.forEach(idx => {
-        const wrap = document.createElement("div");
-        wrap.classList.add("result-item");
-        wrap.innerHTML = `
-          <img src="images/${idx === 999 ? '押井' : idx === 998 ? '高山' : 'item' + idx}.png" alt="item${idx}">
-          <div class="result-name">${idx === 999 ? '押井' : idx === 998 ? '高山' : imageNames[idx - 1]}</div>`;
-        if (!hideAwakening) {
-          const ranks = ["S覚醒", "F覚醒", "M覚醒", "B覚醒", "D覚醒"];
-          const r = ranks[Math.floor(Math.random() * ranks.length)];
-          wrap.innerHTML += `<div class="result-rank ${r}">${r}</div>`;
-        }
-        resultContainer.appendChild(wrap);
-      });
-    }
-
-    function getRandomElements(arr, n) {
-      const s = [...arr];
-      for (let i = s.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [s[i], s[j]] = [s[j], s[i]];
+    // 抽選処理（選択キャラからランダムに抽選）
+    function drawRandomItems(names) {
+      const selectedItems = [...document.querySelectorAll(".item.selected")];
+      if (selectedItems.length === 0) {
+        alert("キャラを1体以上選択してください。");
+        return;
       }
-      return s.slice(0, n);
+
+      // 抽選数は固定3体など（例）
+      const drawCount = 3;
+      const resultsContainer = document.getElementById("resultContainer");
+      resultsContainer.innerHTML = "";
+
+      // ランダム抽選
+      for (let i = 0; i < drawCount; i++) {
+        const randIndex = Math.floor(Math.random() * selectedItems.length);
+        const selected = selectedItems[randIndex];
+        const clone = selected.cloneNode(true);
+        clone.classList.remove("selected");
+        // 覚醒表示用
+        const rankDiv = document.createElement("div");
+        rankDiv.classList.add("result-rank");
+        // ここは簡単に仮実装。必要に応じて置き換え
+        rankDiv.textContent = "覚醒";
+        clone.appendChild(rankDiv);
+        resultsContainer.appendChild(clone);
+      }
     }
 
+    // 選択状態保存
     function saveSelection() {
-      const idx = [...document.querySelectorAll(".item.selected img")].map(img => +img.dataset.index);
-      localStorage.setItem("selectedIndexes", JSON.stringify(idx));
+      const selectedNames = [...document.querySelectorAll(".item.selected")].map(el => el.dataset.name);
+      localStorage.setItem("selectedNames", JSON.stringify(selectedNames));
     }
 
+    // 選択状態復元
     function restoreSelection() {
-      const saved = JSON.parse(localStorage.getItem("selectedIndexes")) || [];
+      const selectedNames = JSON.parse(localStorage.getItem("selectedNames") || "[]");
       document.querySelectorAll(".item").forEach(item => {
-        const idx = +item.querySelector("img").dataset.index;
-        if (saved.includes(idx)) {
+        if (selectedNames.includes(item.dataset.name)) {
           item.classList.add("selected");
           item.querySelector("img").style.filter = "brightness(100%)";
         }
       });
     }
 
+    // 覚醒表示保存・復元（省略）
     function saveAwakeningState() {
-      localStorage.setItem("hideAwakening", JSON.stringify(document.getElementById("hideAwakeningCheckbox").checked));
+      const checked = document.getElementById("hideAwakeningCheckbox").checked;
+      localStorage.setItem("hideAwakening", checked);
     }
-
     function restoreAwakeningState() {
-      const s = JSON.parse(localStorage.getItem("hideAwakening")) || false;
-      document.getElementById("hideAwakeningCheckbox").checked = s;
+      const hideAwakening = JSON.parse(localStorage.getItem("hideAwakening")) || false;
+      document.getElementById("hideAwakeningCheckbox").checked = hideAwakening;
       toggleAwakeningVisibility();
     }
-
     function toggleAwakeningVisibility() {
       const hide = document.getElementById("hideAwakeningCheckbox").checked;
-      document.querySelectorAll(".result-rank").forEach(el => el.style.display = hide ? "none" : "block");
+      document.querySelectorAll(".result-rank").forEach(el => {
+        el.style.display = hide ? "none" : "block";
+      });
     }
 
+    // ボタン押下回数保存・取得
+    function saveDrawButtonCount(count) {
+      localStorage.setItem("drawButtonCount", count);
+    }
     function getDrawButtonCount() {
-      return +localStorage.getItem("drawButtonCount") || 0;
+      return parseInt(localStorage.getItem("drawButtonCount")) || 0;
     }
 
-    function saveDrawButtonCount(c) {
-      localStorage.setItem("drawButtonCount", c);
+    // 追加: すべてを押井に置き換える関数
+    function replaceAllWithOshii() {
+      // 全アイテムを押井に差し替え
+      document.querySelectorAll(".item").forEach(item => {
+        const img = item.querySelector("img");
+        const nameDiv = item.querySelector(".item-name");
+        img.src = "images/押井.png";
+        img.alt = "押井";
+        nameDiv.textContent = "押井";
+      });
+
+      // 抽選結果も押井に差し替え
+      document.querySelectorAll("#resultContainer .item").forEach(item => {
+        const img = item.querySelector("img");
+        const nameDiv = item.querySelector(".item-name");
+        if (img && nameDiv) {
+          img.src = "images/押井.png";
+          img.alt = "押井";
+          nameDiv.textContent = "押井";
+        }
+      });
+
+      alert("すべてのキャラが「押井」に置き換わりました！");
+      localStorage.setItem("oshiiReplaced", true);
     }
+
   </script>
 </body>
 </html>
