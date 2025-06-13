@@ -325,7 +325,7 @@
         const wrap = document.createElement("div");
         wrap.classList.add("result-item");
         wrap.innerHTML = `
-          <img src="images/${idx === 999 ? '押井' : idx === 998 ? 'takayama' : 'item' + idx}.png" alt="item${idx}">
+          <img src="images/${idx === 999 ? '押井' : idx === 998 ? '高山' : 'item' + idx}.png" alt="item${idx}">
           <div class="result-name">${idx === 999 ? '押井' : idx === 998 ? '高山' : imageNames[idx - 1]}</div>`;
         if (!hideAwakening) {
           const ranks = ["S覚醒", "F覚醒", "M覚醒", "B覚醒", "D覚醒"];
